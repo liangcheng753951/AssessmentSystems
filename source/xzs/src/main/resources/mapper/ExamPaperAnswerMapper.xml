@@ -5,7 +5,6 @@
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="exam_paper_id" jdbcType="INTEGER" property="examPaperId" />
     <result column="paper_name" jdbcType="VARCHAR" property="paperName" />
-    <result column="paper_type" jdbcType="INTEGER" property="paperType" />
     <result column="subject_id" jdbcType="INTEGER" property="subjectId" />
     <result column="system_score" jdbcType="INTEGER" property="systemScore" />
     <result column="user_score" jdbcType="INTEGER" property="userScore" />
@@ -15,13 +14,12 @@
     <result column="do_time" jdbcType="INTEGER" property="doTime" />
     <result column="status" jdbcType="INTEGER" property="status" />
     <result column="create_user" jdbcType="INTEGER" property="createUser" />
+    <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="task_exam_id" jdbcType="INTEGER" property="taskExamId" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, exam_paper_id, paper_name, paper_type, subject_id, system_score, user_score,
-    paper_score, question_correct, question_count, do_time, status, create_user, create_time,
-    task_exam_id
+    id, exam_paper_id, paper_name, subject_id, system_score, user_score,
+    paper_score, question_correct, question_count, do_time, status, create_user,create_username, create_time,
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select
@@ -35,16 +33,16 @@
   </delete>
   <insert id="insert" parameterType="com.mindskip.xzs.domain.ExamPaperAnswer" useGeneratedKeys="true" keyProperty="id">
     insert into t_exam_paper_answer (id, exam_paper_id, paper_name,
-      paper_type, subject_id, system_score,
+      subject_id, system_score,
       user_score, paper_score, question_correct,
       question_count, do_time, status,
-      create_user, create_time, task_exam_id
+      create_user,create_username, create_time
       )
     values (#{id,jdbcType=INTEGER}, #{examPaperId,jdbcType=INTEGER}, #{paperName,jdbcType=VARCHAR},
-      #{paperType,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER}, #{systemScore,jdbcType=INTEGER},
+      #{subjectId,jdbcType=INTEGER}, #{systemScore,jdbcType=INTEGER},
       #{userScore,jdbcType=INTEGER}, #{paperScore,jdbcType=INTEGER}, #{questionCorrect,jdbcType=INTEGER},
       #{questionCount,jdbcType=INTEGER}, #{doTime,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
-      #{createUser,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{taskExamId,jdbcType=INTEGER}
+      #{createUser,jdbcType=INTEGER}, #{createUsername,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.mindskip.xzs.domain.ExamPaperAnswer" useGeneratedKeys="true" keyProperty="id">
@@ -58,9 +56,6 @@
       </if>
       <if test="paperName != null">
         paper_name,
-      </if>
-      <if test="paperType != null">
-        paper_type,
       </if>
       <if test="subjectId != null">
         subject_id,
@@ -89,11 +84,11 @@
       <if test="createUser != null">
         create_user,
       </if>
+      <if test="createUsername != null">
+        create_username,
+      </if>
       <if test="createTime != null">
         create_time,
-      </if>
-      <if test="taskExamId != null">
-        task_exam_id,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -105,9 +100,6 @@
       </if>
       <if test="paperName != null">
         #{paperName,jdbcType=VARCHAR},
-      </if>
-      <if test="paperType != null">
-        #{paperType,jdbcType=INTEGER},
       </if>
       <if test="subjectId != null">
         #{subjectId,jdbcType=INTEGER},
@@ -136,11 +128,12 @@
       <if test="createUser != null">
         #{createUser,jdbcType=INTEGER},
       </if>
+      <if test="createUsername != null">
+        #{createUsername,jdbcType=VARCHAR},
+      </if>
+
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskExamId != null">
-        #{taskExamId,jdbcType=INTEGER},
       </if>
     </trim>
   </insert>
@@ -152,9 +145,6 @@
       </if>
       <if test="paperName != null">
         paper_name = #{paperName,jdbcType=VARCHAR},
-      </if>
-      <if test="paperType != null">
-        paper_type = #{paperType,jdbcType=INTEGER},
       </if>
       <if test="subjectId != null">
         subject_id = #{subjectId,jdbcType=INTEGER},
@@ -183,11 +173,11 @@
       <if test="createUser != null">
         create_user = #{createUser,jdbcType=INTEGER},
       </if>
+      <if test="createUsername != null">
+        create_username = #{createUsername,jdbcType=INTEGER},
+      </if>
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="taskExamId != null">
-        task_exam_id = #{taskExamId,jdbcType=INTEGER},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
@@ -196,7 +186,6 @@
     update t_exam_paper_answer
     set exam_paper_id = #{examPaperId,jdbcType=INTEGER},
       paper_name = #{paperName,jdbcType=VARCHAR},
-      paper_type = #{paperType,jdbcType=INTEGER},
       subject_id = #{subjectId,jdbcType=INTEGER},
       system_score = #{systemScore,jdbcType=INTEGER},
       user_score = #{userScore,jdbcType=INTEGER},
@@ -206,8 +195,8 @@
       do_time = #{doTime,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
       create_user = #{createUser,jdbcType=INTEGER},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      task_exam_id = #{taskExamId,jdbcType=INTEGER}
+      create_username = #{createUsername,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
 
@@ -224,12 +213,22 @@
      <if test="subjectId != null">
          and subject_id = #{subjectId}
      </if>
+      <if test="name != null and name != ''">
+        and paper_name LIKE CONCAT('%',#{name},'%')
+      </if>
     </where>
   </select>
 
 
   <select id="selectAllCount"  resultType="java.lang.Integer">
 		SELECT count(*) from t_exam_paper_answer
+  </select>
+
+  <select id="countByStatusAndStudentAndPaper"  resultType="java.lang.Integer">
+		SELECT count(id) from t_exam_paper_answer
+        WHERE exam_paper_id = #{paper_id,jdbcType=INTEGER}
+        AND create_user = #{student_id,jdbcType=INTEGER}
+        AND status = #{status,jdbcType=INTEGER}
   </select>
 
 
@@ -242,16 +241,6 @@
 		GROUP BY create_time
 	</select>
 
-
-  <select id="getByPidUid" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from t_exam_paper_answer
-    where exam_paper_id = #{pid} and create_user=#{uid}
-    limit 1
-  </select>
-
-
   <select id="adminPage" resultMap="BaseResultMap" parameterType="com.mindskip.xzs.viewmodel.admin.paper.ExamPaperAnswerPageRequestVM">
     SELECT
     <include refid="Base_Column_List"/>
@@ -259,6 +248,12 @@
     <where>
       <if test="subjectId != null">
         and subject_id = #{subjectId}
+      </if>
+      <if test="paperName != null and paperName != ''">
+        and paper_name LIKE CONCAT('%',#{paperName},'%')
+      </if>
+     <if test="username != null and username != ''">
+        and create_username = #{username}
       </if>
     </where>
   </select>

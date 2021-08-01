@@ -7,18 +7,11 @@
         </span>
     </el-col>
   </el-row>
-  <el-row  class="do-exam-title-hidden">
-    <el-col :span="24">
-        <span :key="item.itemOrder"  v-for="item in answer.answerItems">
-             <el-tag  class="do-exam-title-tag" >{{item.itemOrder}}</el-tag>
-        </span>
-    </el-col>
-  </el-row>
   <el-container  class="app-item-contain">
     <el-header class="align-center">
       <h1>{{form.name}}</h1>
       <div>
-        <span class="question-title-padding">Your Marks：{{answer.score}}</span>
+        <span class="question-title-padding">Marks：{{answer.score}}</span>
         <span class="question-title-padding">Time consumption：{{formatSeconds(answer.doTime)}}</span>
       </div>
     </el-header>
@@ -43,8 +36,8 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import { formatSeconds } from '@/utils'
-import QuestionAnswerShow from '../components/QuestionAnswerShow'
-import examPaperAnswerApi from '@/api/examPaperAnswer'
+import QuestionAnswerShow from '../answer/components/QuestionAnswerShow'
+import examPaperAnswerApi from '@/api/examPaperAnwser'
 export default {
   components: { QuestionAnswerShow },
   data () {
@@ -86,7 +79,7 @@ export default {
   computed: {
     ...mapGetters('enumItem', ['enumFormat']),
     ...mapState('enumItem', {
-      doRightTag: state => state.exam.question.answer.doRightTag
+      doRightTag: state => state.exam.questionAnswer.answer.doRightTag
     })
   }
 }

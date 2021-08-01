@@ -2,53 +2,39 @@ package com.mindskip.xzs.controller.student;
 
 import com.mindskip.xzs.base.BaseApiController;
 import com.mindskip.xzs.base.RestResponse;
-import com.mindskip.xzs.domain.Message;
-import com.mindskip.xzs.domain.MessageUser;
+import com.mindskip.xzs.base.SystemCode;
 import com.mindskip.xzs.domain.User;
-import com.mindskip.xzs.domain.UserEventLog;
 import com.mindskip.xzs.domain.enums.RoleEnum;
 import com.mindskip.xzs.domain.enums.UserStatusEnum;
-import com.mindskip.xzs.event.UserEvent;
 import com.mindskip.xzs.service.AuthenticationService;
-import com.mindskip.xzs.service.MessageService;
-import com.mindskip.xzs.service.UserEventLogService;
 import com.mindskip.xzs.service.UserService;
-import com.mindskip.xzs.utility.DateTimeUtil;
-import com.mindskip.xzs.utility.PageInfoHelper;
-import com.mindskip.xzs.viewmodel.student.user.*;
-import com.github.pagehelper.PageInfo;
+import com.mindskip.xzs.viewmodel.student.user.UserRegisterVM;
+import com.mindskip.xzs.viewmodel.student.user.UserResponseVM;
+import com.mindskip.xzs.viewmodel.student.user.UserUpdatePasswordVM;
+import com.mindskip.xzs.viewmodel.student.user.UserUpdateVM;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-
-/**
- * @author 武汉思维跳跃科技有限公司
- */
 @RestController("StudentUserController")
 @RequestMapping(value = "/api/student/user")
 public class UserController extends BaseApiController {
 
     private final UserService userService;
-    private final UserEventLogService userEventLogService;
-    private final MessageService messageService;
     private final AuthenticationService authenticationService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public UserController(UserService userService, UserEventLogService userEventLogService, MessageService messageService, AuthenticationService authenticationService, ApplicationEventPublisher eventPublisher) {
+    public UserController(UserService userService, AuthenticationService authenticationService) {
         this.userService = userService;
-        this.userEventLogService = userEventLogService;
-        this.messageService = messageService;
         this.authenticationService = authenticationService;
-        this.eventPublisher = eventPublisher;
     }
 
     @RequestMapping(value = "/current", method = RequestMethod.POST)
@@ -61,9 +47,12 @@ public class UserController extends BaseApiController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public RestResponse register(@RequestBody @Valid UserRegisterVM model) {
+        if (!model.getPassword().equals(model.getPasswordConfirm())) {
+            return new RestResponse<>(SystemCode.ParameterValidError.getCode(), "Inconsistent password input.");
+        }
         User existUser = userService.getUserByUserName(model.getUserName());
         if (null != existUser) {
-            return new RestResponse<>(2, "用户已存在");
+            return new RestResponse<>(2, "User has already exist!");
         }
         User user = modelMapper.map(model, User.class);
         String encodePwd = authenticationService.pwdEncode(model.getPassword());
@@ -75,9 +64,6 @@ public class UserController extends BaseApiController {
         user.setCreateTime(new Date());
         user.setDeleted(false);
         userService.insertByFilter(user);
-        UserEventLog userEventLog = new UserEventLog(user.getId(), user.getUserName(), user.getRealName(), new Date());
-        userEventLog.setContent("欢迎 " + user.getUserName() + " 注册来到学之思开源考试系统");
-        eventPublisher.publishEvent(new UserEvent(userEventLog));
         return RestResponse.ok();
     }
 
@@ -89,55 +75,36 @@ public class UserController extends BaseApiController {
         }
         User user = userService.selectById(getCurrentUser().getId());
         modelMapper.map(model, user);
+        if (user.getBirthDay() != null) {
+            Calendar now = Calendar.getInstance();
+            Calendar born = Calendar.getInstance();
+            now.setTime(new Date());
+            born.setTime(user.getBirthDay());
+            user.setAge(now.get(Calendar.YEAR) - born.get(Calendar.YEAR));
+        }
         user.setModifyTime(new Date());
         userService.updateByIdFilter(user);
-        UserEventLog userEventLog = new UserEventLog(user.getId(), user.getUserName(), user.getRealName(), new Date());
-        userEventLog.setContent(user.getUserName() + " 更新了个人资料");
-        eventPublisher.publishEvent(new UserEvent(userEventLog));
         return RestResponse.ok();
     }
 
-    @RequestMapping(value = "/log", method = RequestMethod.POST)
-    public RestResponse<List<UserEventLogVM>> log() {
-        User user = getCurrentUser();
-        List<UserEventLog> userEventLogs = userEventLogService.getUserEventLogByUserId(user.getId());
-        List<UserEventLogVM> userEventLogVMS = userEventLogs.stream().map(d -> {
-            UserEventLogVM vm = modelMapper.map(d, UserEventLogVM.class);
-            vm.setCreateTime(DateTimeUtil.dateFormat(d.getCreateTime()));
-            return vm;
-        }).collect(Collectors.toList());
-        return RestResponse.ok(userEventLogVMS);
+    @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
+    public RestResponse updatePassword(@RequestBody @Valid UserUpdatePasswordVM model) {
+        if (!model.getNewPassword().equals(model.getNewPasswordConfirm())) {
+            return new RestResponse<>(SystemCode.ParameterValidError.getCode(), "Inconsistent password input.");
+        }
+        if (model.getNewPassword().length() < 6) {
+            return new RestResponse<>(SystemCode.ParameterValidError.getCode(), "Password can not less than 6 characters.");
+        }
+        User user = userService.selectById(getCurrentUser().getId());
+        boolean validResult = authenticationService.authUser(user, user.getUserName(), model.getCurrentPassword());
+        if (validResult) {
+            String encodePwd = authenticationService.pwdEncode(model.getNewPassword());
+            user.setPassword(encodePwd);
+            user.setModifyTime(new Date());
+            userService.updateByIdFilter(user);
+            return RestResponse.ok();
+        } else {
+            return RestResponse.fail(2, "Password error!");
+        }
     }
-
-    @RequestMapping(value = "/message/page", method = RequestMethod.POST)
-    public RestResponse<PageInfo<MessageResponseVM>> messagePageList(@RequestBody MessageRequestVM messageRequestVM) {
-        messageRequestVM.setReceiveUserId(getCurrentUser().getId());
-        PageInfo<MessageUser> messageUserPageInfo = messageService.studentPage(messageRequestVM);
-        List<Integer> ids = messageUserPageInfo.getList().stream().map(d -> d.getMessageId()).collect(Collectors.toList());
-        List<Message> messages = ids.size() != 0 ? messageService.selectMessageByIds(ids) : null;
-        PageInfo<MessageResponseVM> page = PageInfoHelper.copyMap(messageUserPageInfo, e -> {
-            MessageResponseVM vm = modelMapper.map(e, MessageResponseVM.class);
-            messages.stream().filter(d -> e.getMessageId().equals(d.getId())).findFirst().ifPresent(message -> {
-                vm.setTitle(message.getTitle());
-                vm.setContent(message.getContent());
-                vm.setSendUserName(message.getSendUserName());
-            });
-            vm.setCreateTime(DateTimeUtil.dateFormat(e.getCreateTime()));
-            return vm;
-        });
-        return RestResponse.ok(page);
-    }
-
-    @RequestMapping(value = "/message/unreadCount", method = RequestMethod.POST)
-    public RestResponse unReadCount() {
-        Integer count = messageService.unReadCount(getCurrentUser().getId());
-        return RestResponse.ok(count);
-    }
-
-    @RequestMapping(value = "/message/read/{id}", method = RequestMethod.POST)
-    public RestResponse read(@PathVariable Integer id) {
-        messageService.read(id);
-        return RestResponse.ok();
-    }
-
 }

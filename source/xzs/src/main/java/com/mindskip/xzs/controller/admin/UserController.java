@@ -1,44 +1,43 @@
 package com.mindskip.xzs.controller.admin;
 
+import com.github.pagehelper.PageInfo;
 import com.mindskip.xzs.base.BaseApiController;
 import com.mindskip.xzs.base.RestResponse;
-import com.mindskip.xzs.domain.other.KeyValue;
+import com.mindskip.xzs.base.SystemCode;
 import com.mindskip.xzs.domain.User;
-import com.mindskip.xzs.domain.UserEventLog;
 import com.mindskip.xzs.domain.enums.UserStatusEnum;
+import com.mindskip.xzs.domain.other.KeyValue;
 import com.mindskip.xzs.service.AuthenticationService;
-import com.mindskip.xzs.service.UserEventLogService;
+import com.mindskip.xzs.service.SubjectService;
 import com.mindskip.xzs.service.UserService;
 import com.mindskip.xzs.utility.DateTimeUtil;
-import com.mindskip.xzs.viewmodel.admin.user.*;
 import com.mindskip.xzs.utility.PageInfoHelper;
-import com.github.pagehelper.PageInfo;
-
+import com.mindskip.xzs.viewmodel.admin.user.*;
+import com.mindskip.xzs.viewmodel.student.user.UserUpdatePasswordVM;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
-/**
- * @author 武汉思维跳跃科技有限公司
- */
 @RestController("AdminUserController")
 @RequestMapping(value = "/api/admin/user")
 public class UserController extends BaseApiController {
 
     private final UserService userService;
-    private final UserEventLogService userEventLogService;
     private final AuthenticationService authenticationService;
+    @Autowired
+    private SubjectService subjectService;
 
     @Autowired
-    public UserController(UserService userService, UserEventLogService userEventLogService, AuthenticationService authenticationService) {
+    public UserController(UserService userService, AuthenticationService authenticationService) {
         this.userService = userService;
-        this.userEventLogService = userEventLogService;
         this.authenticationService = authenticationService;
     }
 
@@ -46,33 +45,21 @@ public class UserController extends BaseApiController {
     @RequestMapping(value = "/page/list", method = RequestMethod.POST)
     public RestResponse<PageInfo<UserResponseVM>> pageList(@RequestBody UserPageRequestVM model) {
         PageInfo<User> pageInfo = userService.userPage(model);
-        PageInfo<UserResponseVM> page = PageInfoHelper.copyMap(pageInfo, d -> UserResponseVM.from(d));
-        return RestResponse.ok(page);
-    }
-
-
-    @RequestMapping(value = "/event/page/list", method = RequestMethod.POST)
-    public RestResponse<PageInfo<UserEventLogVM>> eventPageList(@RequestBody UserEventPageRequestVM model) {
-        PageInfo<UserEventLog> pageInfo = userEventLogService.page(model);
-        PageInfo<UserEventLogVM> page = PageInfoHelper.copyMap(pageInfo, d -> {
-            UserEventLogVM vm = modelMapper.map(d, UserEventLogVM.class);
-            vm.setCreateTime(DateTimeUtil.dateFormat(d.getCreateTime()));
-            return vm;
-        });
+        PageInfo<UserResponseVM> page = PageInfoHelper.copyMap(pageInfo, user -> UserResponseVM.from(user, subjectService));
         return RestResponse.ok(page);
     }
 
     @RequestMapping(value = "/select/{id}", method = RequestMethod.POST)
     public RestResponse<UserResponseVM> select(@PathVariable Integer id) {
         User user = userService.getUserById(id);
-        UserResponseVM userVm = UserResponseVM.from(user);
+        UserResponseVM userVm = UserResponseVM.from(user, subjectService);
         return RestResponse.ok(userVm);
     }
 
     @RequestMapping(value = "/current", method = RequestMethod.POST)
     public RestResponse<UserResponseVM> current() {
         User user = getCurrentUser();
-        UserResponseVM userVm = UserResponseVM.from(user);
+        UserResponseVM userVm = UserResponseVM.from(user, subjectService);
         return RestResponse.ok(userVm);
     }
 
@@ -82,18 +69,21 @@ public class UserController extends BaseApiController {
         if (model.getId() == null) {  //create
             User existUser = userService.getUserByUserName(model.getUserName());
             if (null != existUser) {
-                return new RestResponse<>(2, "用户已存在");
+                return new RestResponse<>(2, "user is exist!");
             }
-
-            if (StringUtils.isBlank(model.getPassword())) {
-                return new RestResponse<>(3, "密码不能为空");
-            }
+            model.setPassword("123456");
         }
         if (StringUtils.isBlank(model.getBirthDay())) {
-            model.setBirthDay(null);
+            return new RestResponse<>(2, "please input the birthday");
         }
         User user = modelMapper.map(model, User.class);
+        Calendar now = Calendar.getInstance();
+        Calendar born = Calendar.getInstance();
 
+        now.setTime(new Date());
+        born.setTime(user.getBirthDay());
+        user.setAge(now.get(Calendar.YEAR) - born.get(Calendar.YEAR));
+        user.setModules(model.getModules().stream().map(String::valueOf).collect(Collectors.joining(",")));
         if (model.getId() == null) {
             String encodePwd = authenticationService.pwdEncode(model.getPassword());
             user.setPassword(encodePwd);
@@ -121,6 +111,27 @@ public class UserController extends BaseApiController {
         user.setModifyTime(new Date());
         userService.updateByIdFilter(user);
         return RestResponse.ok();
+    }
+
+    @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
+    public RestResponse updatePassword(@RequestBody @Valid UserUpdatePasswordVM model) {
+        if (!model.getNewPassword().equals(model.getNewPasswordConfirm())) {
+            return new RestResponse<>(SystemCode.ParameterValidError.getCode(), "Inconsistent password input.");
+        }
+        if (model.getNewPassword().length() < 6){
+            return new RestResponse<>(SystemCode.ParameterValidError.getCode(), "Password can not less than 6 characters.");
+        }
+        User user = userService.selectById(getCurrentUser().getId());
+        boolean validResult = authenticationService.authUser(user, user.getUserName(), model.getCurrentPassword());
+        if (validResult) {
+            String encodePwd = authenticationService.pwdEncode(model.getNewPassword());
+            user.setPassword(encodePwd);
+            user.setModifyTime(new Date());
+            userService.updateByIdFilter(user);
+            return RestResponse.ok();
+        } else {
+            return RestResponse.fail(2,  "Password error!");
+        }
     }
 
 

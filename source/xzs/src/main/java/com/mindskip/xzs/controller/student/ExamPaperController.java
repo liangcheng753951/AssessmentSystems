@@ -1,8 +1,11 @@
 package com.mindskip.xzs.controller.student;
 
+import com.github.pagehelper.PageInfo;
 import com.mindskip.xzs.base.BaseApiController;
 import com.mindskip.xzs.base.RestResponse;
 import com.mindskip.xzs.domain.ExamPaper;
+import com.mindskip.xzs.domain.User;
+import com.mindskip.xzs.domain.enums.ExamPaperAnswerStatusEnum;
 import com.mindskip.xzs.service.ExamPaperAnswerService;
 import com.mindskip.xzs.service.ExamPaperService;
 import com.mindskip.xzs.utility.DateTimeUtil;
@@ -10,7 +13,6 @@ import com.mindskip.xzs.utility.PageInfoHelper;
 import com.mindskip.xzs.viewmodel.admin.exam.ExamPaperEditRequestVM;
 import com.mindskip.xzs.viewmodel.student.exam.ExamPaperPageResponseVM;
 import com.mindskip.xzs.viewmodel.student.exam.ExamPaperPageVM;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.*;
@@ -32,10 +34,14 @@ public class ExamPaperController extends BaseApiController {
         this.eventPublisher = eventPublisher;
     }
 
-
-    @RequestMapping(value = "/select/{id}", method = RequestMethod.POST)
-    public RestResponse<ExamPaperEditRequestVM> select(@PathVariable Integer id) {
+    @RequestMapping(value = "/selectForAssessment/{id}", method = RequestMethod.POST)
+    public RestResponse<ExamPaperEditRequestVM> selectForAssessment(@PathVariable Integer id) {
+        User user = getCurrentUser();
+        int existWorkCount = examPaperAnswerService.countByStatusAndStudentAndPaper(user, id, ExamPaperAnswerStatusEnum.Complete.getCode());
         ExamPaperEditRequestVM vm = examPaperService.examPaperToVM(id);
+        if (existWorkCount > 0) {
+            vm.setDuplicateWork(true);
+        }
         return RestResponse.ok(vm);
     }
 

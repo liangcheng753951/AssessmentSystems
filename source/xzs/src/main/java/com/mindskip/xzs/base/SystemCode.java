@@ -1,41 +1,35 @@
 package com.mindskip.xzs.base;
 
-/**
- * @version 3.3.0
- * @description: The enum System code.
- * Copyright (C), 2020-2021, 武汉思维跳跃科技有限公司
- * @date 2021/5/25 10:45
- */
 public enum SystemCode {
     /**
      * OK
      */
-    OK(1, "成功"),
+    OK(1, "Success"),
     /**
      * AccessTokenError
      */
-    AccessTokenError(400, "用户登录令牌失效"),
+    AccessTokenError(400, "Invalid user login token"),
     /**
      * UNAUTHORIZED
      */
-    UNAUTHORIZED(401, "用户未登录"),
+    UNAUTHORIZED(401, "User not logged in"),
     /**
      * UNAUTHORIZED
      */
-    AuthError(402, "用户名或密码错误"),
+    AuthError(402, "Incorrect username or password"),
     /**
      * InnerError
      */
-    InnerError(500, "系统内部错误"),
+    InnerError(500, "Internal system errors"),
     /**
      * ParameterValidError
      */
-    ParameterValidError(501, "参数验证错误"),
+    ParameterValidError(501, "Parameter validation error"),
 
     /**
      * AccessDenied
      */
-    AccessDenied(502, "用户没有权限访问");
+    AccessDenied(502, "Users do not have permission to access");
 
     /**
      * The Code.

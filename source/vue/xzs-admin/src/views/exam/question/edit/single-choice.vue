@@ -1,52 +1,68 @@
 <template>
   <div class="app-container">
-    <el-form :model="form" ref="form" label-width="100px" v-loading="formLoading" :rules="rules">
-      <el-form-item label="年级：" prop="gradeLevel" required>
-        <el-select v-model="form.gradeLevel" placeholder="年级"  @change="levelChange" clearable>
-          <el-option v-for="item in levelEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
+    <el-form :model="form" ref="form" label-width="130px" v-loading="formLoading" :rules="rules">
+      <el-form-item label="Module：" prop="subjectId" required>
+        <el-select v-model="form.subjectId" placeholder="Module" >
+          <el-option v-for="item in subjectFilter" :key="item.id" :value="item.id" :label="item.name"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="学科：" prop="subjectId" required>
-        <el-select v-model="form.subjectId" placeholder="学科" >
-          <el-option v-for="item in subjectFilter" :key="item.id" :value="item.id" :label="item.name+' ( '+item.levelName+' )'"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="题干：" prop="title" required>
+      <el-form-item label="Content：" prop="title" required>
         <el-input v-model="form.title"   @focus="inputClick(form,'title')" />
       </el-form-item>
-      <el-form-item label="选项：" required>
-        <el-form-item :label="item.prefix" :key="item.prefix"  v-for="(item,index) in form.items"  label-width="50px" class="question-item-label">
-          <el-input v-model="item.prefix"  style="width:50px;" />
-          <el-input v-model="item.content"   @focus="inputClick(item,'content')"  class="question-item-content-input"/>
-           <el-button type="danger" size="mini" class="question-item-remove" icon="el-icon-delete" @click="questionItemRemove(index)"></el-button>
+      <el-form-item label="Key points：" prop="keyPoint">
+        <el-tag
+          :key="tag"
+          v-for="tag in form.keyPoints"
+          closable
+          :disable-transitions="false"
+          @close="handleClose(tag)">
+          {{tag}}
+        </el-tag>
+        <el-input
+          style="width:150px;"
+          class="input-new-tag"
+          v-if="keyPointsVisible"
+          v-model="keyPointInputValue"
+          ref="saveTagInput"
+          size="small"
+          @keyup.enter.native="handleInputConfirm"
+          @blur="handleInputConfirm"
+        >
+        </el-input>
+        <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Key Point</el-button>
+      </el-form-item>
+      <el-form-item label="Options：" required>
+        <el-form-item :label="item.prefix" :key="item.prefix"  v-for="(item) in form.items"  label-width="50px" class="question-item-label">
+          <el-input v-model="item.prefix"  style="width:50px;" :disabled="true"/>
+          <el-input v-model="item.content"  v-if="item.prefix !== 'C'" @focus="inputClick(item,'content')"  class="question-item-content-input"/>
+          <el-input v-model="item.content"  v-if="item.prefix === 'C'" :disabled="true"  class="question-item-content-input"/>
         </el-form-item>
       </el-form-item>
-      <el-form-item label="解析：" prop="analyze" required>
+      <el-form-item label="analysis：" prop="analyze" required>
         <el-input v-model="form.analyze"  @focus="inputClick(form,'analyze')" />
       </el-form-item>
-      <el-form-item label="分数：" prop="score" required>
+      <el-form-item label="Score：" prop="score" required>
         <el-input-number v-model="form.score" :precision="1" :step="1" :max="100"></el-input-number>
       </el-form-item>
-      <el-form-item label="难度：" required>
+      <el-form-item label="difficulty：" required>
         <el-rate v-model="form.difficult" class="question-item-rate"></el-rate>
       </el-form-item>
-      <el-form-item label="正确答案：" prop="correct" required>
-        <el-radio-group v-model="form.correct">
+      <el-form-item label="Answer：" prop="correct" required>
+        <el-radio-group v-model="form.correct">A
           <el-radio  v-for="item in form.items"  :key="item.prefix"  :label="item.prefix">{{item.prefix}}</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
-        <el-button type="success" @click="questionItemAdd">添加选项</el-button>
-        <el-button type="success" @click="showQuestion">预览</el-button>
+        <el-button type="primary" @click="submitForm">Submit</el-button>
+        <el-button @click="resetForm">Reset</el-button>
+        <el-button type="success" @click="showQuestion">Preview</el-button>
       </el-form-item>
     </el-form>
     <el-dialog  :visible.sync="richEditor.dialogVisible"  append-to-body :close-on-click-modal="false" style="width: 100%;height: 100%"   :show-close="false" center>
       <Ueditor @ready="editorReady"/>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="editorConfirm">确 定</el-button>
-        <el-button @click="richEditor.dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editorConfirm">OK</el-button>
+        <el-button @click="richEditor.dialogVisible = false">Cancel</el-button>
       </span>
     </el-dialog>
     <el-dialog :visible.sync="questionShow.dialog" style="width: 100%;height: 100%">
@@ -58,7 +74,7 @@
 <script>
 import QuestionShow from '../components/Show'
 import Ueditor from '@/components/Ueditor'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import questionApi from '@/api/question'
 
 export default {
@@ -67,43 +83,40 @@ export default {
   },
   data () {
     return {
+      keyPointsVisible: false,
+      keyPointInputValue: '',
       form: {
         id: null,
         questionType: 1,
-        gradeLevel: null,
-        subjectId: null,
-        title: '',
+        subjectId: 1,
+        title: '2',
+        keyPoints: ['3'],
         items: [
-          { prefix: 'A', content: '' },
-          { prefix: 'B', content: '' },
-          { prefix: 'C', content: '' },
-          { prefix: 'D', content: '' }
+          { prefix: 'A', content: '444' },
+          { prefix: 'B', content: '444' },
+          { prefix: 'C', content: 'All above' }
         ],
-        analyze: '',
-        correct: '',
-        score: '',
-        difficult: 0
+        analyze: '4',
+        correct: 'A',
+        score: '2'
       },
       subjectFilter: null,
       formLoading: false,
       rules: {
-        gradeLevel: [
-          { required: true, message: '请选择年级', trigger: 'change' }
-        ],
         subjectId: [
-          { required: true, message: '请选择学科', trigger: 'change' }
+          { required: true, message: 'please select the module', trigger: 'change' }
         ],
         title: [
-          { required: true, message: '请输入题干', trigger: 'blur' }
+          { required: true, message: 'please input the content', trigger: 'blur' }
         ],
         analyze: [
-          { required: true, message: '请输入解析', trigger: 'blur' }
+          { required: true, message: 'please input the analysis', trigger: 'blur' }
         ],
         score: [
-          { required: true, message: '请输入分数', trigger: 'blur' }
+          { required: true, message: 'please input the score', trigger: 'blur' }
         ],
         correct: [
-          { required: true, message: '请选择正确答案', trigger: 'change' }
+          { required: true, message: 'please select the correct answer', trigger: 'change' }
         ]
       },
       richEditor: {
@@ -148,8 +161,7 @@ export default {
       this.richEditor.dialogVisible = true
     },
     editorConfirm () {
-      let content = this.richEditor.instance.getContent()
-      this.richEditor.object[this.richEditor.parameterName] = content
+      this.richEditor.object[this.richEditor.parameterName] = this.richEditor.instance.getContent()
       this.richEditor.dialogVisible = false
     },
     questionItemRemove (index) {
@@ -201,8 +213,7 @@ export default {
         items: [
           { prefix: 'A', content: '' },
           { prefix: 'B', content: '' },
-          { prefix: 'C', content: '' },
-          { prefix: 'D', content: '' }
+          { prefix: 'C', content: 'All above' }
         ],
         analyze: '',
         correct: '',
@@ -211,25 +222,50 @@ export default {
       }
       this.form.id = lastId
     },
-    levelChange () {
-      this.form.subjectId = null
-      this.subjectFilter = this.subjects.filter(data => data.level === this.form.gradeLevel)
-    },
     showQuestion () {
       this.questionShow.dialog = true
       this.questionShow.qType = this.form.questionType
       this.questionShow.question = this.form
+    },
+    handleClose (tag) {
+      this.form.keyPoints.splice(this.form.keyPoints.indexOf(tag), 1)
+    },
+
+    showInput () {
+      this.keyPointsVisible = true
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+
+    handleInputConfirm () {
+      let inputValue = this.keyPointInputValue
+      if (inputValue) {
+        this.form.keyPoints.push(inputValue)
+      }
+      this.keyPointsVisible = false
+      this.keyPointInputValue = ''
     },
     ...mapActions('exam', { initSubject: 'initSubject' }),
     ...mapActions('tagsView', { delCurrentView: 'delCurrentView' })
   },
   computed: {
     ...mapGetters('enumItem', ['enumFormat']),
-    ...mapState('enumItem', {
-      questionTypeEnum: state => state.exam.question.typeEnum,
-      levelEnum: state => state.user.levelEnum
-    }),
     ...mapState('exam', { subjects: state => state.subjects })
   }
 }
 </script>
+<style>
+.el-tag + .el-tag {
+  margin-left: 10px;
+}
+.button-new-tag {
+  margin-left: 10px;
+  line-height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.input-new-tag {
+  margin-left: 10px;
+}
+</style>

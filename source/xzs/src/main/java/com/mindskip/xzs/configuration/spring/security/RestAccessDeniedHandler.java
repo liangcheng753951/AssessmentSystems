@@ -10,13 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * 没权限
- */
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
     @Override
-    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException, ServletException {
+    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) {
         RestUtil.response(httpServletResponse, SystemCode.AccessDenied);
     }
 }

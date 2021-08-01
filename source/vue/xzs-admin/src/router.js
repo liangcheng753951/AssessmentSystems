@@ -21,7 +21,7 @@ const constantRoutes = [
     name: 'Login',
     hidden: true,
     component: () => import('@/views/login/index'),
-    meta: { title: '登录' }
+    meta: { title: 'Login' }
   },
   {
     path: '/',
@@ -32,7 +32,7 @@ const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: '主页', icon: 'home', affix: true }
+        meta: { title: 'Home', icon: 'home', affix: true }
       }
     ]
   },
@@ -40,8 +40,9 @@ const constantRoutes = [
     path: '/user',
     component: Layout,
     name: 'UserPage',
+    alwaysShow: true,
     meta: {
-      title: '用户管理',
+      title: 'User Management',
       icon: 'users'
     },
     children: [
@@ -49,26 +50,13 @@ const constantRoutes = [
         path: 'student/list',
         component: () => import('@/views/user/student/list'),
         name: 'UserStudentPageList',
-        meta: { title: '学生列表', noCache: true }
+        meta: { title: 'Student', noCache: true }
       },
       {
         path: 'student/edit',
         component: () => import('@/views/user/student/edit'),
         name: 'UserStudentEdit',
-        meta: { title: '学生编辑', noCache: true, activeMenu: '/user/student/list' },
-        hidden: true
-      },
-      {
-        path: 'admin/list',
-        component: () => import('@/views/user/admin/list'),
-        name: 'UserAdminPageList',
-        meta: { title: '管理员列表', noCache: true }
-      },
-      {
-        path: 'admin/edit',
-        component: () => import('@/views/user/admin/edit'),
-        name: 'UserAdminEdit',
-        meta: { title: '管理员编辑', noCache: true, activeMenu: '/user/admin/list' },
+        meta: { title: 'Student Edit', noCache: true, activeMenu: '/user/student/list' },
         hidden: true
       }
     ]
@@ -78,7 +66,7 @@ const constantRoutes = [
     component: Layout,
     name: 'ExamPage',
     meta: {
-      title: '卷题管理',
+      title: 'Exam',
       icon: 'exam'
     },
     children: [
@@ -86,79 +74,27 @@ const constantRoutes = [
         path: 'paper/list',
         component: () => import('@/views/exam/paper/list'),
         name: 'ExamPaperPageList',
-        meta: { title: '试卷列表', noCache: true }
+        meta: { title: 'Paper', noCache: true }
       },
       {
         path: 'paper/edit',
         component: () => import('@/views/exam/paper/edit'),
         name: 'ExamPaperEdit',
-        meta: { title: '试卷编辑', noCache: true, activeMenu: '/exam/paper/list' },
+        meta: { title: 'Paper Edit', noCache: true, activeMenu: '/exam/paper/list' },
         hidden: true
       },
       {
         path: 'question/list',
         component: () => import('@/views/exam/question/list'),
         name: 'ExamQuestionPageList',
-        meta: { title: '题目列表', noCache: true }
+        meta: { title: 'Question', noCache: true }
       },
       {
         path: 'question/edit/singleChoice',
         component: () => import('@/views/exam/question/edit/single-choice'),
         name: 'singleChoicePage',
-        meta: { title: '单选题编辑', noCache: true, activeMenu: '/exam/question/list' },
+        meta: { title: 'Question Edit', noCache: true, activeMenu: '/exam/question/list' },
         hidden: true
-      },
-      {
-        path: 'question/edit/multipleChoice',
-        component: () => import('@/views/exam/question/edit/multiple-choice'),
-        name: 'multipleChoicePage',
-        meta: { title: '多选题编辑', noCache: true, activeMenu: '/exam/question/list' },
-        hidden: true
-      },
-      {
-        path: 'question/edit/trueFalse',
-        component: () => import('@/views/exam/question/edit/true-false'),
-        name: 'trueFalsePage',
-        meta: { title: '判断题编辑', noCache: true, activeMenu: '/exam/question/list' },
-        hidden: true
-      },
-      {
-        path: 'question/edit/gapFilling',
-        component: () => import('@/views/exam/question/edit/gap-filling'),
-        name: 'gapFillingPage',
-        meta: { title: '填空题编辑', noCache: true, activeMenu: '/exam/question/list' },
-        hidden: true
-      },
-      {
-        path: 'question/edit/shortAnswer',
-        component: () => import('@/views/exam/question/edit/short-answer'),
-        name: 'shortAnswerPage',
-        meta: { title: '简答题编辑', noCache: true, activeMenu: '/exam/question/list' },
-        hidden: true
-      }
-    ]
-  },
-  {
-    path: '/task',
-    component: Layout,
-    name: 'TaskPage',
-    meta: {
-      title: '任务管理',
-      icon: 'task'
-    },
-    alwaysShow: true,
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/task/list'),
-        name: 'TaskListPage',
-        meta: { title: '任务列表', noCache: true }
-      },
-      {
-        path: 'edit',
-        component: () => import('@/views/task/edit'),
-        name: 'TaskEditPage',
-        meta: { title: '任务创建', noCache: true }
       }
     ]
   },
@@ -167,7 +103,7 @@ const constantRoutes = [
     component: Layout,
     name: 'EducationPage',
     meta: {
-      title: '教育管理',
+      title: 'Module',
       icon: 'education'
     },
     alwaysShow: true,
@@ -176,13 +112,13 @@ const constantRoutes = [
         path: 'subject/list',
         component: () => import('@/views/education/subject/list'),
         name: 'EducationSubjectPage',
-        meta: { title: '学科列表', noCache: true }
+        meta: { title: 'Module List', noCache: true }
       },
       {
         path: 'subject/edit',
         component: () => import('@/views/education/subject/edit'),
         name: 'EducationSubjectEditPage',
-        meta: { title: '学科编辑', noCache: true, activeMenu: '/education/subject/list' },
+        meta: { title: 'Module Edit', noCache: true, activeMenu: '/education/subject/list' },
         hidden: true
       }
     ]
@@ -192,7 +128,7 @@ const constantRoutes = [
     component: Layout,
     name: 'AnswerPage',
     meta: {
-      title: '成绩管理',
+      title: 'Answer',
       icon: 'answer'
     },
     alwaysShow: true,
@@ -201,49 +137,7 @@ const constantRoutes = [
         path: 'list',
         component: () => import('@/views/answer/list'),
         name: 'AnswerPageList',
-        meta: { title: '答卷列表', noCache: true }
-      }
-    ]
-  },
-  {
-    path: '/message',
-    component: Layout,
-    name: 'MessagePage',
-    meta: {
-      title: '消息中心',
-      icon: 'message'
-    },
-    alwaysShow: true,
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/message/list'),
-        name: 'MessageListPage',
-        meta: { title: '消息列表', noCache: true }
-      },
-      {
-        path: 'send',
-        component: () => import('@/views/message/send'),
-        name: 'MessageSendPage',
-        meta: { title: '消息发送', noCache: true }
-      }
-    ]
-  },
-  {
-    path: '/log',
-    component: Layout,
-    name: 'LogPage',
-    meta: {
-      title: '日志中心',
-      icon: 'log'
-    },
-    alwaysShow: true,
-    children: [
-      {
-        path: 'user/list',
-        component: () => import('@/views/log/list'),
-        name: 'LogUserPage',
-        meta: { title: '用户日志', noCache: true }
+        meta: { title: 'Answer List', noCache: true }
       }
     ]
   },
@@ -256,7 +150,7 @@ const constantRoutes = [
         path: 'index',
         component: () => import('@/views/profile/index'),
         name: 'Profile',
-        meta: { title: '个人简介', icon: 'user', noCache: true }
+        meta: { title: 'Profile', icon: 'user', noCache: true }
       }
     ]
   },
@@ -264,7 +158,8 @@ const constantRoutes = [
     hidden: true,
     component: () => import('@/views/error-page/404'),
     meta: { title: '404', noCache: true }
-  }
+  },
+  { path: '/read', name: 'ExamPaperRead', hidden: true, component: () => import('@/views/answer/read'), meta: { title: 'Paper result' } }
 ]
 
 const router = new Router({

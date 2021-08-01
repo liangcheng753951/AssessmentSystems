@@ -9,6 +9,9 @@ import com.mindskip.xzs.service.*;
 import com.mindskip.xzs.utility.DateTimeUtil;
 import com.mindskip.xzs.utility.ExamUtil;
 import com.mindskip.xzs.utility.PageInfoHelper;
+import com.mindskip.xzs.viewmodel.admin.exam.ExamPaperEditRequestVM;
+import com.mindskip.xzs.viewmodel.student.exam.ExamPaperReadVM;
+import com.mindskip.xzs.viewmodel.student.exam.ExamPaperSubmitVM;
 import com.mindskip.xzs.viewmodel.student.exampaper.ExamPaperAnswerPageResponseVM;
 import com.mindskip.xzs.viewmodel.admin.paper.ExamPaperAnswerPageRequestVM;
 import com.github.pagehelper.PageInfo;
@@ -22,6 +25,9 @@ public class ExamPaperAnswerController extends BaseApiController {
     private final ExamPaperAnswerService examPaperAnswerService;
     private final SubjectService subjectService;
     private final UserService userService;
+
+    @Autowired
+    ExamPaperService examPaperService;
 
     @Autowired
     public ExamPaperAnswerController(ExamPaperAnswerService examPaperAnswerService, SubjectService subjectService, UserService userService) {
@@ -48,6 +54,17 @@ public class ExamPaperAnswerController extends BaseApiController {
             return vm;
         });
         return RestResponse.ok(page);
+    }
+
+    @RequestMapping(value = "/read/{id}", method = RequestMethod.POST)
+    public RestResponse<ExamPaperReadVM> read(@PathVariable Integer id) {
+        ExamPaperAnswer examPaperAnswer = examPaperAnswerService.selectById(id);
+        ExamPaperReadVM vm = new ExamPaperReadVM();
+        ExamPaperEditRequestVM paper = examPaperService.examPaperToVM(examPaperAnswer.getExamPaperId());
+        ExamPaperSubmitVM answer = examPaperAnswerService.examPaperAnswerToVM(examPaperAnswer.getId());
+        vm.setPaper(paper);
+        vm.setAnswer(answer);
+        return RestResponse.ok(vm);
     }
 
 

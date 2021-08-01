@@ -2,8 +2,8 @@ package com.mindskip.xzs.service.enums;
 
 public enum ActionEnum {
 
-    ADD(1, "新增"),
-    UPDATE(2, "修改");
+    ADD(1, "ADD"),
+    UPDATE(2, "UPDATE");
 
     int code;
     String Name;

@@ -29,32 +29,15 @@ public class ExamUtil {
         long minutes = (second % (60 * 60)) / 60;
         long seconds = second % 60;
         if (days > 0) {
-            dateTimes = days + "天 " + hours + "时 " + minutes + "分 " + seconds + "秒";
+            dateTimes = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
         } else if (hours > 0) {
-            dateTimes = hours + "时 " + minutes + "分 " + seconds + "秒";
+            dateTimes = hours + "h " + minutes + "m " + seconds + "s";
         } else if (minutes > 0) {
-            dateTimes = minutes + "分 " + seconds + "秒";
+            dateTimes = minutes + "m " + seconds + "s";
         } else {
-            dateTimes = seconds + " 秒";
+            dateTimes = seconds + " s";
         }
         return dateTimes;
     }
 
-    private static final String ANSWER_SPLIT = ",";
-
-    public static String contentToString(List<String> contentArray) {
-        return contentArray.stream().sorted().collect(Collectors.joining(ANSWER_SPLIT));
-    }
-
-
-    public static List<String> contentToArray(String contentArray) {
-        return Arrays.asList(contentArray.split(ANSWER_SPLIT));
-    }
-
-    private static final String FORM_ANSWER_SPLIT = "_";
-
-    public static Integer lastNum(String str) {
-        Integer start = str.lastIndexOf(FORM_ANSWER_SPLIT);
-        return Integer.parseInt(str.substring(start + 1));
-    }
 }

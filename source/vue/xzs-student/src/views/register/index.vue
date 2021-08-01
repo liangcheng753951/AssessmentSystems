@@ -1,49 +1,45 @@
 <template>
   <div class="lowin  lowin-blue">
     <div class="lowin-brand">
-      <img src="@/assets/logo2.png" alt="logo" style="margin-top: 12px">
+      <img src="@/assets/uosLogo.png" alt="logo">
     </div>
     <div class="lowin-wrapper">
       <div class="lowin-box lowin-register">
         <div class="lowin-box-inner">
           <el-form ref="loginForm" :model="loginForm">
-            <p>学之思开源考试系统</p>
+            <p style="font-size: 20px; color: #1f2f3d">School of ECS</p>
             <div class="lowin-group">
-              <label>用户名 </label>
-              <el-input ref="userName" v-model="loginForm.userName" class="lowin-input" placeholder="用户名"
+              <label>Username </label>
+              <el-input ref="userName" v-model="loginForm.userName" class="lowin-input" placeholder="Please use the school email prefix"
                         name="userName" type="text" tabindex="1" auto-complete="on"/>
             </div>
             <div class="lowin-group password-group">
-              <label>密码</label>
-              <el-input class="lowin-input" ref="password" v-model="loginForm.password"
-                        placeholder="密码" name="password" tabindex="2" auto-complete="on"
+              <label>Password </label>
+              <el-input class="lowin-input" ref="password" v-model="loginForm.password" type="password"
+                        placeholder="Password" name="password" tabindex="2" auto-complete="on"
                         @keyup.enter.native="handleLogin"/>
             </div>
-            <div class="lowin-group">
-              <label>年级 </label>
-              <el-select class="lowin-input" v-model="loginForm.userLevel" placeholder="年级">
-                <el-option v-for="item in levelEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
-              </el-select>
+            <div class="lowin-group password-group">
+              <label>Password Confirm </label>
+              <el-input class="lowin-input" ref="password" v-model="loginForm.passwordConfirm" type="password"
+                        placeholder="Password Confirm" name="password" tabindex="2" auto-complete="on"
+                        @keyup.enter.native="handleLogin"/>
             </div>
-            <el-button type="text" class="lowin-btn login-btn" @click.native.prevent="handleRegister">注册</el-button>
+            <el-button type="text" class="lowin-btn login-btn" @click.native.prevent="handleRegister">Register</el-button>
             <div class="text-foot">
-              已有账号?
+              Already have an account?
               <router-link to="/login" class="login-link">
-                登录
+                Login
               </router-link>
             </div>
           </el-form>
         </div>
       </div>
     </div>
-    <div class="account-foot-copyright">
-      <span>Copyright © 2021 武汉思维跳跃科技有限公司 版权所有</span>
-    </div>
   </div>
 </template>
 
 <script>
-import { mapMutations, mapState } from 'vuex'
 import registerApi from '@/api/register'
 
 export default {
@@ -53,7 +49,7 @@ export default {
       loginForm: {
         userName: '',
         password: '',
-        userLevel: 1
+        passwordConfirm: ''
       }
     }
   },
@@ -62,18 +58,21 @@ export default {
       let _this = this
       registerApi.register(this.loginForm).then(function (result) {
         if (result && result.code === 1) {
-          _this.$router.push({ path: '/login' })
+          _this.open()
         } else {
           _this.$message.error(result.message)
         }
       })
     },
-    ...mapMutations('user', ['setUserName'])
-  },
-  computed: {
-    ...mapState('enumItem', {
-      levelEnum: state => state.user.levelEnum
-    })
+    open () {
+      let _this = this
+      this.$alert('Registration successful! Please contact the lecturer to add modules for you', 'Notice', {
+        confirmButtonText: 'OK',
+        callback: action => {
+          _this.$router.push({ path: '/login' })
+        }
+      })
+    }
   }
 }
 </script>
@@ -139,7 +138,6 @@ export default {
     width: 100px;
     height: 100px;
     margin: 0 auto -50px auto;
-    border-radius: 50%;
     -webkit-box-shadow: 0 4px 40px rgba(0, 0, 0, .07);
     box-shadow: 0 4px 40px rgba(0, 0, 0, .07);
     padding: 10px;

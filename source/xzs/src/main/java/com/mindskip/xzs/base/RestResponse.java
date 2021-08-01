@@ -1,11 +1,8 @@
 package com.mindskip.xzs.base;
 
-/**
- * @version 3.3.0
- * @description: The type Rest response.
- * Copyright (C), 2020-2021, 武汉思维跳跃科技有限公司
- * @date 2021/5/25 10:45
- */
+import lombok.Data;
+
+@Data
 public class RestResponse<T> {
     private int code;
     private String message;
@@ -66,59 +63,5 @@ public class RestResponse<T> {
     public static <F> RestResponse<F> ok(F response) {
         SystemCode systemCode = SystemCode.OK;
         return new RestResponse<>(systemCode.getCode(), systemCode.getMessage(), response);
-    }
-
-    /**
-     * Gets code.
-     *
-     * @return the code
-     */
-    public int getCode() {
-        return code;
-    }
-
-    /**
-     * Sets code.
-     *
-     * @param code the code
-     */
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    /**
-     * Gets message.
-     *
-     * @return the message
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Sets message.
-     *
-     * @param message the message
-     */
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    /**
-     * Gets response.
-     *
-     * @return the response
-     */
-    public T getResponse() {
-        return response;
-    }
-
-    /**
-     * Sets response.
-     *
-     * @param response the response
-     */
-    public void setResponse(T response) {
-        this.response = response;
     }
 }

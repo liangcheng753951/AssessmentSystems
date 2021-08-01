@@ -1,13 +1,10 @@
 <template>
   <el-form>
-    <el-form-item label="真实姓名">
+    <el-form-item label="Real name">
       <el-input v-model.trim="userInfo.realName" />
     </el-form-item>
-    <el-form-item label="手机号">
-      <el-input v-model.trim="userInfo.phone" />
-    </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="submit">更新</el-button>
+      <el-button type="primary" @click="submit">Update</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -20,8 +17,7 @@ export default {
       type: Object,
       default: () => {
         return {
-          realName: '',
-          phone: ''
+          realName: ''
         }
       }
     }

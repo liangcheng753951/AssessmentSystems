@@ -1,37 +1,34 @@
 <template>
   <div class="lowin  lowin-blue">
     <div class="lowin-brand">
-      <img src="@/assets/logo2.png" alt="logo" style="margin-top: 12px">
+      <img src="@/assets/uosLogo.png" >
     </div>
     <div class="lowin-wrapper">
       <div class="lowin-box lowin-login">
         <div class="lowin-box-inner">
           <el-form ref="loginForm" :model="loginForm" :rules="loginRules">
-            <p>学之思开源考试系统</p>
+            <p style="font-size: 20px; color: #1f2f3d">School of ECS</p>
             <div class="lowin-group">
-              <label>用户名 </label>
-              <el-input ref="userName" v-model="loginForm.userName" class="lowin-input" placeholder="用户名" name="userName" type="text" tabindex="1" auto-complete="on"/>
+              <label>Username </label>
+              <el-input ref="userName" v-model="loginForm.userName" class="lowin-input" placeholder="Username" name="userName" type="text" tabindex="1" auto-complete="on"/>
             </div>
             <div class="lowin-group password-group">
-              <label>密码 <a href="#" class="forgot-link">忘记密码?</a></label>
+              <label>Password </label>
               <el-input  class="lowin-input" :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType"
-                placeholder="密码" name="password" tabindex="2" auto-complete="on" @keyup.native="checkCapslock" @blur="capsTooltip = false" @keyup.enter.native="handleLogin"/>
+                placeholder="Password" name="password" tabindex="2" auto-complete="on" @keyup.native="checkCapslock" @blur="capsTooltip = false" @keyup.enter.native="handleLogin"/>
             </div>
 
-            <el-button :loading="loading" type="text" class="lowin-btn login-btn"  @click.native.prevent="handleLogin">登录</el-button>
+            <el-button :loading="loading" type="text" class="lowin-btn login-btn"  @click.native.prevent="handleLogin">Login</el-button>
 
             <div class="text-foot">
-              还没有账号?
+              No account?
               <router-link to="/register" class="register-link">
-                注册
+                Register
               </router-link>
             </div>
           </el-form>
         </div>
       </div>
-    </div>
-    <div class="account-foot-copyright">
-      <span>Copyright © 2021 武汉思维跳跃科技有限公司 版权所有</span>
     </div>
   </div>
 </template>
@@ -43,16 +40,9 @@ import loginApi from '@/api/login'
 export default {
   name: 'Login',
   data () {
-    const validateUsername = (rule, value, callback) => {
-      if (value.length < 5) {
-        callback(new Error('用户名不能少于5个字符'))
-      } else {
-        callback()
-      }
-    }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 5) {
-        callback(new Error('密码不能少于5个字符'))
+      if (value.length < 6) {
+        callback(new Error('Password cannot be less than 6 characters'))
       } else {
         callback()
       }
@@ -64,7 +54,6 @@ export default {
         remember: false
       },
       loginRules: {
-        userName: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       passwordType: 'password',
@@ -99,16 +88,6 @@ export default {
       if (key === 'CapsLock' && this.capsTooltip === true) {
         this.capsTooltip = false
       }
-    },
-    showPwd () {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
-      } else {
-        this.passwordType = 'password'
-      }
-      this.$nextTick(() => {
-        this.$refs.password.focus()
-      })
     },
     handleLogin () {
       let _this = this
@@ -197,7 +176,6 @@ export default {
     width: 100px;
     height: 100px;
     margin: 0 auto -50px auto;
-    border-radius: 50%;
     -webkit-box-shadow: 0 4px 40px rgba(0, 0, 0, .07);
     box-shadow: 0 4px 40px rgba(0, 0, 0, .07);
     padding: 10px;

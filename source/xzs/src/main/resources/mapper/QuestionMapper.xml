@@ -3,21 +3,19 @@
 <mapper namespace="com.mindskip.xzs.repository.QuestionMapper">
   <resultMap id="BaseResultMap" type="com.mindskip.xzs.domain.Question">
     <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="question_type" jdbcType="INTEGER" property="questionType" />
     <result column="subject_id" jdbcType="INTEGER" property="subjectId" />
+    <result column="key_points" jdbcType="VARCHAR" property="keyPoints" />
     <result column="score" jdbcType="INTEGER" property="score" />
-    <result column="grade_level" jdbcType="INTEGER" property="gradeLevel" />
     <result column="difficult" jdbcType="INTEGER" property="difficult" />
     <result column="correct" jdbcType="VARCHAR" property="correct" />
     <result column="info_text_content_id" jdbcType="INTEGER" property="infoTextContentId" />
     <result column="create_user" jdbcType="INTEGER" property="createUser" />
-    <result column="status" jdbcType="INTEGER" property="status" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="deleted" jdbcType="BIT" property="deleted" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, question_type, subject_id, score, grade_level, difficult, correct, info_text_content_id,
-    create_user, status, create_time, deleted
+    id, subject_id, key_points, score, difficult, correct, info_text_content_id,
+    create_user, create_time, deleted
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select
@@ -30,15 +28,15 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.mindskip.xzs.domain.Question" useGeneratedKeys="true" keyProperty="id">
-    insert into t_question (id, question_type, subject_id,
-      score, grade_level, difficult,
+    insert into t_question (id, subject_id,key_points,
+      score, difficult,
       correct, info_text_content_id, create_user,
-      status, create_time, deleted
+      create_time, deleted
       )
-    values (#{id,jdbcType=INTEGER}, #{questionType,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER},
-      #{score,jdbcType=INTEGER}, #{gradeLevel,jdbcType=INTEGER}, #{difficult,jdbcType=INTEGER},
+    values (#{id,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER},#{keyPoints,jdbcType=VARCHAR},
+      #{score,jdbcType=INTEGER}, #{difficult,jdbcType=INTEGER},
       #{correct,jdbcType=VARCHAR}, #{infoTextContentId,jdbcType=INTEGER}, #{createUser,jdbcType=INTEGER},
-      #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{deleted,jdbcType=BIT}
+      #{createTime,jdbcType=TIMESTAMP}, #{deleted,jdbcType=BIT}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.mindskip.xzs.domain.Question" useGeneratedKeys="true" keyProperty="id">
@@ -47,17 +45,14 @@
       <if test="id != null">
         id,
       </if>
-      <if test="questionType != null">
-        question_type,
-      </if>
       <if test="subjectId != null">
         subject_id,
       </if>
+      <if test="keyPoints != null">
+        key_points,
+      </if>
       <if test="score != null">
         score,
-      </if>
-      <if test="gradeLevel != null">
-        grade_level,
       </if>
       <if test="difficult != null">
         difficult,
@@ -71,9 +66,6 @@
       <if test="createUser != null">
         create_user,
       </if>
-      <if test="status != null">
-        status,
-      </if>
       <if test="createTime != null">
         create_time,
       </if>
@@ -85,17 +77,14 @@
       <if test="id != null">
         #{id,jdbcType=INTEGER},
       </if>
-      <if test="questionType != null">
-        #{questionType,jdbcType=INTEGER},
-      </if>
       <if test="subjectId != null">
         #{subjectId,jdbcType=INTEGER},
       </if>
+      <if test="keyPoints != null">
+        #{keyPoints,jdbcType=VARCHAR},
+      </if>
       <if test="score != null">
         #{score,jdbcType=INTEGER},
-      </if>
-      <if test="gradeLevel != null">
-        #{gradeLevel,jdbcType=INTEGER},
       </if>
       <if test="difficult != null">
         #{difficult,jdbcType=INTEGER},
@@ -109,9 +98,6 @@
       <if test="createUser != null">
         #{createUser,jdbcType=INTEGER},
       </if>
-      <if test="status != null">
-        #{status,jdbcType=INTEGER},
-      </if>
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
       </if>
@@ -123,17 +109,14 @@
   <update id="updateByPrimaryKeySelective" parameterType="com.mindskip.xzs.domain.Question">
     update t_question
     <set>
-      <if test="questionType != null">
-        question_type = #{questionType,jdbcType=INTEGER},
-      </if>
       <if test="subjectId != null">
         subject_id = #{subjectId,jdbcType=INTEGER},
       </if>
+      <if test="keyPoints != null">
+        key_points = #{keyPoints,jdbcType=VARCHAR},
+      </if>
       <if test="score != null">
         score = #{score,jdbcType=INTEGER},
-      </if>
-      <if test="gradeLevel != null">
-        grade_level = #{gradeLevel,jdbcType=INTEGER},
       </if>
       <if test="difficult != null">
         difficult = #{difficult,jdbcType=INTEGER},
@@ -147,9 +130,6 @@
       <if test="createUser != null">
         create_user = #{createUser,jdbcType=INTEGER},
       </if>
-      <if test="status != null">
-        status = #{status,jdbcType=INTEGER},
-      </if>
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
@@ -161,22 +141,18 @@
   </update>
   <update id="updateByPrimaryKey" parameterType="com.mindskip.xzs.domain.Question">
     update t_question
-    set question_type = #{questionType,jdbcType=INTEGER},
+    set
       subject_id = #{subjectId,jdbcType=INTEGER},
+      key_points = #{keyPoints,jdbcType=VARCHAR},
       score = #{score,jdbcType=INTEGER},
-      grade_level = #{gradeLevel,jdbcType=INTEGER},
       difficult = #{difficult,jdbcType=INTEGER},
       correct = #{correct,jdbcType=VARCHAR},
       info_text_content_id = #{infoTextContentId,jdbcType=INTEGER},
       create_user = #{createUser,jdbcType=INTEGER},
-      status = #{status,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       deleted = #{deleted,jdbcType=BIT}
     where id = #{id,jdbcType=INTEGER}
   </update>
-
-
-
 
   <select id="page" resultMap="BaseResultMap" parameterType="com.mindskip.xzs.viewmodel.admin.question.QuestionPageRequestVM">
     SELECT
@@ -187,19 +163,11 @@
       <if test="id != null ">
         and id= #{id}
       </if>
-      <if test="level != null ">
-        and grade_level= #{level}
-      </if>
       <if test="subjectId != null ">
         and subject_id= #{subjectId}
       </if>
-      <if test="questionType != null ">
-        and question_type= #{questionType}
-      </if>
     </where>
   </select>
-
-
 
   <select id="selectByIds" resultMap="BaseResultMap" >
     SELECT
@@ -211,18 +179,8 @@
     </foreach>
   </select>
 
-
   <select id="selectAllCount"  resultType="java.lang.Integer">
 		SELECT count(*) from t_question where  deleted=0
-	</select>
-
-  <select id="selectCountByDate"  resultType="com.mindskip.xzs.domain.other.KeyValue">
-		SELECT create_time as name,COUNT(create_time) as value from
-		        (
-				  SELECT DATE_FORMAT(create_time,'%Y-%m-%d') as create_time from t_question
-					WHERE  deleted=0  and  create_time  between  #{startTime}  and  #{endTime}
-				) a
-		GROUP BY create_time
 	</select>
 
 </mapper>

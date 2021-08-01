@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
 @Mapper
-public interface SubjectMapper  extends BaseMapper<Subject> {
+public interface SubjectMapper extends BaseMapper<Subject> {
     int deleteByPrimaryKey(Integer id);
 
     int insert(Subject record);
@@ -20,9 +20,9 @@ public interface SubjectMapper  extends BaseMapper<Subject> {
 
     int updateByPrimaryKey(Subject record);
 
-    List<Subject> getSubjectByLevel(Integer level);
-
     List<Subject> allSubject();
+
+    List<Subject> selectByIds(List<Integer> list);
 
     List<Subject> page(SubjectPageRequestVM requestVM);
 }

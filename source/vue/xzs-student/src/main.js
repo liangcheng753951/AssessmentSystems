@@ -4,6 +4,7 @@ import { router } from './router'
 import store from './store'
 import 'normalize.css/normalize.css'
 import Element from 'element-ui'
+import local from '../node_modules/element-ui/lib/locale/lang/en'
 import 'element-ui/lib/theme-chalk/index.css'
 
 import '@/styles/index.scss' // global css
@@ -12,6 +13,7 @@ import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 
 Vue.use(Element, {
+  locale: local,
   size: 'medium' // set element-ui default size
 })
 

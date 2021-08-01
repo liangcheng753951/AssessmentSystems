@@ -1,83 +1,77 @@
 <template>
   <div class="app-container">
 
-    <el-form :model="form" ref="form" label-width="100px" v-loading="formLoading" :rules="rules">
-      <el-form-item label="用户名："  prop="userName" required>
+    <el-form :model="form" ref="form" label-width="130px" v-loading="formLoading" :rules="rules">
+      <el-form-item label="Username："  prop="userName" required>
         <el-input v-model="form.userName"></el-input>
       </el-form-item>
-      <el-form-item label="密码："  required>
-        <el-input v-model="form.password"></el-input>
-      </el-form-item>
-      <el-form-item label="真实姓名：" prop="realName" required>
+      <el-form-item label="Real name：" prop="realName" required>
         <el-input v-model="form.realName"></el-input>
       </el-form-item>
-      <el-form-item label="年龄：">
-        <el-input v-model="form.age"></el-input>
-      </el-form-item>
-      <el-form-item label="性别：">
-        <el-select v-model="form.sex" placeholder="性别" clearable>
+      <el-form-item label="Sex：">
+        <el-select v-model="form.sex" placeholder="Sex" clearable>
           <el-option v-for="item in sexEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="出生日期：">
-        <el-date-picker v-model="form.birthDay" type="date" value-format="yyyy-MM-dd" placeholder="选择日期" />
+      <el-form-item label="Birthday：">
+        <el-date-picker v-model="form.birthDay" type="date" value-format="yyyy-MM-dd" placeholder="click to select date"/>
       </el-form-item>
-      <el-form-item label="手机：">
-        <el-input v-model="form.phone"></el-input>
-      </el-form-item>
-      <el-form-item label="年级：" prop="userLevel" required>
-        <el-select v-model="form.userLevel" placeholder="年级">
-          <el-option v-for="item in levelEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
+      <el-form-item label="Modules：">
+        <el-select v-model="form.modules" multiple collapse-tags placeholder="Click to select">
+          <el-option
+            v-for="item in subjectFilter"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id">
+          </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="状态：" required>
-        <el-select v-model="form.status" placeholder="状态">
+      <el-form-item label="Status：" required>
+        <el-select v-model="form.status" placeholder="Status">
           <el-option v-for="item in statusEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
+        <el-button type="primary" @click="submitForm">Submit</el-button>
+        <el-button @click="resetForm">Reset</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import userApi from '@/api/user'
 
 export default {
   data () {
     return {
+      subjectFilter: null,
       form: {
         id: null,
-        userName: '',
-        password: '',
-        realName: '',
+        userName: 'cl9n20',
         role: 1,
+        modules: [],
+        realName: 'Cheng Liang',
         status: 1,
-        age: '',
         sex: '',
-        birthDay: null,
-        phone: null,
-        userLevel: null
+        birthDay: null
       },
       formLoading: false,
       rules: {
         userName: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+          { required: true, message: 'please input the username', trigger: 'blur' }
         ],
         realName: [
-          { required: true, message: '请输入真实姓名', trigger: 'blur' }
-        ],
-        userLevel: [
-          { required: true, message: '请选择年级', trigger: 'change' }
+          { required: true, message: 'please input the real name', trigger: 'blur' }
         ]
       }
     }
   },
   created () {
+    this.initSubject(function () {
+      _this.subjectFilter = _this.subjects
+    })
     let id = this.$route.query.id
     let _this = this
     if (id && parseInt(id) !== 0) {
@@ -118,19 +112,16 @@ export default {
       this.form = {
         id: null,
         userName: '',
-        password: '',
         realName: '',
         role: 1,
         status: 1,
-        age: '',
         sex: '',
-        birthDay: null,
-        phone: null,
-        userLevel: null
+        birthDay: null
       }
       this.form.id = lastId
     },
-    ...mapActions('tagsView', { delCurrentView: 'delCurrentView' })
+    ...mapActions('tagsView', { delCurrentView: 'delCurrentView' }),
+    ...mapActions('exam', { initSubject: 'initSubject' })
   },
   computed: {
     ...mapGetters('enumItem', [
@@ -138,10 +129,9 @@ export default {
     ]),
     ...mapState('enumItem', {
       sexEnum: state => state.user.sexEnum,
-      roleEnum: state => state.user.roleEnum,
-      statusEnum: state => state.user.statusEnum,
-      levelEnum: state => state.user.levelEnum
-    })
+      statusEnum: state => state.user.statusEnum
+    }),
+    ...mapState('exam', { subjects: state => state.subjects })
   }
 }
 </script>

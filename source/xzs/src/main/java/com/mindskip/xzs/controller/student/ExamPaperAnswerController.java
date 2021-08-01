@@ -1,11 +1,13 @@
 package com.mindskip.xzs.controller.student;
 
+import com.github.pagehelper.PageInfo;
 import com.mindskip.xzs.base.BaseApiController;
 import com.mindskip.xzs.base.RestResponse;
-import com.mindskip.xzs.domain.*;
-import com.mindskip.xzs.domain.enums.ExamPaperAnswerStatusEnum;
+import com.mindskip.xzs.domain.ExamPaperAnswer;
+import com.mindskip.xzs.domain.ExamPaperAnswerInfo;
+import com.mindskip.xzs.domain.Subject;
+import com.mindskip.xzs.domain.User;
 import com.mindskip.xzs.event.CalculateExamPaperAnswerCompleteEvent;
-import com.mindskip.xzs.event.UserEvent;
 import com.mindskip.xzs.service.ExamPaperAnswerService;
 import com.mindskip.xzs.service.ExamPaperService;
 import com.mindskip.xzs.service.SubjectService;
@@ -17,13 +19,11 @@ import com.mindskip.xzs.viewmodel.student.exam.ExamPaperReadVM;
 import com.mindskip.xzs.viewmodel.student.exam.ExamPaperSubmitVM;
 import com.mindskip.xzs.viewmodel.student.exampaper.ExamPaperAnswerPageResponseVM;
 import com.mindskip.xzs.viewmodel.student.exampaper.ExamPaperAnswerPageVM;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Date;
 
 @RestController("StudentExamPaperAnswerController")
 @RequestMapping(value = "/api/student/exampaper/answer")
@@ -66,42 +66,11 @@ public class ExamPaperAnswerController extends BaseApiController {
     public RestResponse answerSubmit(@RequestBody @Valid ExamPaperSubmitVM examPaperSubmitVM) {
         User user = getCurrentUser();
         ExamPaperAnswerInfo examPaperAnswerInfo = examPaperAnswerService.calculateExamPaperAnswer(examPaperSubmitVM, user);
-        if (null == examPaperAnswerInfo) {
-            return RestResponse.fail(2, "试卷不能重复做");
-        }
         ExamPaperAnswer examPaperAnswer = examPaperAnswerInfo.getExamPaperAnswer();
         Integer userScore = examPaperAnswer.getUserScore();
         String scoreVm = ExamUtil.scoreToVM(userScore);
-        UserEventLog userEventLog = new UserEventLog(user.getId(), user.getUserName(), user.getRealName(), new Date());
-        String content = user.getUserName() + " 提交试卷：" + examPaperAnswerInfo.getExamPaper().getName()
-                + " 得分：" + scoreVm
-                + " 耗时：" + ExamUtil.secondToVM(examPaperAnswer.getDoTime());
-        userEventLog.setContent(content);
         eventPublisher.publishEvent(new CalculateExamPaperAnswerCompleteEvent(examPaperAnswerInfo));
-        eventPublisher.publishEvent(new UserEvent(userEventLog));
         return RestResponse.ok(scoreVm);
-    }
-
-
-    @RequestMapping(value = "/edit", method = RequestMethod.POST)
-    public RestResponse edit(@RequestBody @Valid ExamPaperSubmitVM examPaperSubmitVM) {
-        boolean notJudge = examPaperSubmitVM.getAnswerItems().stream().anyMatch(i -> i.getDoRight() == null && i.getScore() == null);
-        if (notJudge) {
-            return RestResponse.fail(2, "有未批改题目");
-        }
-
-        ExamPaperAnswer examPaperAnswer = examPaperAnswerService.selectById(examPaperSubmitVM.getId());
-        ExamPaperAnswerStatusEnum examPaperAnswerStatusEnum = ExamPaperAnswerStatusEnum.fromCode(examPaperAnswer.getStatus());
-        if (examPaperAnswerStatusEnum == ExamPaperAnswerStatusEnum.Complete) {
-            return RestResponse.fail(3, "试卷已完成");
-        }
-        String score = examPaperAnswerService.judge(examPaperSubmitVM);
-        User user = getCurrentUser();
-        UserEventLog userEventLog = new UserEventLog(user.getId(), user.getUserName(), user.getRealName(), new Date());
-        String content = user.getUserName() + " 批改试卷：" + examPaperAnswer.getPaperName() + " 得分：" + score;
-        userEventLog.setContent(content);
-        eventPublisher.publishEvent(new UserEvent(userEventLog));
-        return RestResponse.ok(score);
     }
 
     @RequestMapping(value = "/read/{id}", method = RequestMethod.POST)

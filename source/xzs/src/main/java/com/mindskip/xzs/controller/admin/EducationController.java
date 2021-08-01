@@ -59,11 +59,4 @@ public class EducationController extends BaseApiController {
         return RestResponse.ok(vm);
     }
 
-    @RequestMapping(value = "/subject/delete/{id}", method = RequestMethod.POST)
-    public RestResponse delete(@PathVariable Integer id) {
-        Subject subject = subjectService.selectById(id);
-        subject.setDeleted(true);
-        subjectService.updateByIdFilter(subject);
-        return RestResponse.ok();
-    }
 }

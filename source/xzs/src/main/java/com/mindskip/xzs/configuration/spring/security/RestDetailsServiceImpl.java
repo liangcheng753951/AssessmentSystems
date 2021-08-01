@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
-/**
- * @author :  武汉思维跳跃科技有限公司
- * Description :  验证通过之后,第二、三...请求，会调用此类
- */
 
 @Component
 public class RestDetailsServiceImpl implements UserDetailsService {
@@ -34,7 +30,7 @@ public class RestDetailsServiceImpl implements UserDetailsService {
         com.mindskip.xzs.domain.User user = userService.getUserByUserName(username);
 
         if (user == null) {
-            throw new UsernameNotFoundException("Username  not found.");
+            throw new UsernameNotFoundException("Username not found.");
         }
 
         ArrayList<GrantedAuthority> grantedAuthorities = new ArrayList<>();

@@ -10,10 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * 未登录
- * @author 武汉思维跳跃科技有限公司
- */
 @Component
 public final class LoginAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
 
@@ -22,8 +18,7 @@ public final class LoginAuthenticationEntryPoint extends LoginUrlAuthenticationE
     }
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
         RestUtil.response(response, SystemCode.UNAUTHORIZED);
     }
 

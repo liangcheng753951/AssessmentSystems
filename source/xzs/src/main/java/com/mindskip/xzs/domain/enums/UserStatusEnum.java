@@ -6,8 +6,8 @@ import java.util.Map;
 
 public enum UserStatusEnum {
 
-    Enable(1, "启用"),
-    Disable(2, "禁用");
+    Enable(1, "Available"),
+    Disable(2, "Unavailable");
 
     int code;
     String name;

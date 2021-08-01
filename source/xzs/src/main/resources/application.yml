@@ -12,7 +12,8 @@ server:
 #logging logback
 logging:
   config: classpath:logback-spring.xml
-  file: xzs
+  file: ecs_assessment
+  path: ./log/
 
 #mybatis
 mybatis:
@@ -27,17 +28,10 @@ system:
     - /api/admin/upload/configAndUpload
     - /api/admin/upload/auth
     - /api/student/user/register
+    - /api/student/exampaper/answer/read/
   pwdKey:
     publicKey: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClwwxhJKwStDnu7c0yCRkwTW2VKuLWwyVtFC6Zx9bYdF1qwqSP26CkDwaF6GHayIvv9b8BHlAaQH4SLIPzir062yzNukqspmthUw4gPJhbx1AQrWRoQJSv3/1Sk+tWyJRHXSiCZJZ3216LDhtx42LQ0HItDP8U9BLtsxA+5LEZzQIDAQAB
     privateKey: MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAKXDDGEkrBK0Oe7tzTIJGTBNbZUq4tbDJW0ULpnH1th0XWrCpI/boKQPBoXoYdrIi+/1vwEeUBpAfhIsg/OKvTrbLM26Sqyma2FTDiA8mFvHUBCtZGhAlK/f/VKT61bIlEddKIJklnfbXosOG3HjYtDQci0M/xT0Eu2zED7ksRnNAgMBAAECgYEAlCuz5yn2volnt9HNuEo1v92WdN5vAnZSAB0oQsJFpBrwXjw7CXTTNZNQy2YcAot9uzO6Vu+Xvr+jce9ky9BasM7ehz0gnwJWAO79IqUnmu3RRq7HllDwp72qysXIypJZCF4HX5jAzUGlNzlTSUb1H4LtavKc6a//YqPfQ0jTLsECQQDZuGKGAYq6rBCX0+T8qlQpCPc41wsl4Gi9lLD21ks9PMx44JdhsUrqLWItZiGynDzq1LJ3M1hr3gbSsPQcI9HJAkEAwugDFCiRLOqOBRRGlYbzgGdmXbR4SrMNIpcFTFhU+MsEqaMueVPiNtRSIK6W8pS28ZN0aiZDTBAT84fOIENp5QJBAJaVgQ9OYbVa7N8WH3riE/ONz+/wTDWWUNtOzFbtQHzKYGH6dLmM9lOhsBXWXdg7V6bUFdt8F9wDZJS07yHHZIECQG4rHrJiS80Lt8L/NvaGFVVbHO2SePwgQShwHLqOo1kNyFDqv/YsiA1d7h4zEXeEv/PE2WS2xAtWezCIbualtFECQQDPUkYhs3vZoZgsltdeFnv/WoXaXNRIzunMTmksIlh8JP7C1xQHrwdCpUkffgSVphxGJGHkxooMpki7oTC1Mdjx
-  wx:
-    appid: wx143688bee37bad34
-    secret: 320e54e556d5722275b75fc3bba6177b
-    token-to-live: 12h   #token 过期时间
-    security-ignore-urls:
-      - /api/wx/student/auth/bind
-      - /api/wx/student/auth/checkBind
-      - /api/wx/student/user/register
   qn:
     url: http://xzs.file.mindskip.net
     bucket: mindskip
@@ -57,24 +51,44 @@ spring:
   session:
     store-type: redis
   datasource:
-    hikari:
-      idle-timeout: 600000  #10 min
-      max-lifetime: 1800000 #30 min
+    url: jdbc:mysql://localhost:3306/ass?charset=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/London
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: lc147789
+    driver-class-name: com.mysql.jdbc.Driver
+    platform: mysql
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 下面为连接池的补充设置，应用到上面所有数据源中
+    # 初始化大小，最小，最大
+    initial-size: 1
+    min-idle: 3
+    max-active: 20
+    max-wait: 60000
+    validation-query: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    # 配置间隔多久才进行一次检测,检测需要关闭的空闲连接,单位是毫秒
+    timeBetweenEvictionRunsMillis: 60000
+    # 配置一个连接在池中最小生存的时间,单位是毫秒
+    minEvictableIdleTimeMillis: 300000
+#    hikari:
+#      idle-timeout: 600000  #10 min
+#      max-lifetime: 1800000 #30 min
   redis:
     timeout: 10000 #超时时间
     database: 0 #0-15 16个库 默认0
-    lettuce:
+    jedis:
       pool:
         max-active: 8 #最大连接数
         max-wait: -1 #默认-1 最大连接阻塞等待时间
         max-idle: 8 #最大空闲连接 默认8
         min-idle: 0 #最小空闲连接
+    host: localhost
+    port: 6379
   cache:
     type: redis
     redis:
       time-to-live: 12h   #12 hour
 
 
-  #runningtime environment
-  profiles:
-    active:  dev

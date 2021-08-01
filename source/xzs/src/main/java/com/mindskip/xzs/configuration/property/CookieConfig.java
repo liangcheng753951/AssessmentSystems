@@ -3,7 +3,7 @@ package com.mindskip.xzs.configuration.property;
 public class CookieConfig {
 
     public static String getName() {
-        return "xzs";
+        return "ecs";
     }
 
     public static Integer getInterval() {

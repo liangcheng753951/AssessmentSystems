@@ -1,29 +1,25 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParam" ref="queryForm" :inline="true">
-      <el-form-item label="年级：">
-        <el-select v-model="queryParam.level" placeholder="年级" clearable="">
-          <el-option v-for="item in levelEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
-        </el-select>
+      <el-form-item label="Modules：">
+        <el-input v-model="queryParam.module" clearable></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm">查询</el-button>
+        <el-button type="primary" @click="submitForm">Query</el-button>
         <router-link :to="{path:'/education/subject/edit'}" class="link-left">
-          <el-button type="primary">添加</el-button>
+          <el-button type="primary">Add</el-button>
         </router-link>
       </el-form-item>
     </el-form>
 
     <el-table v-loading="listLoading" :data="tableData" border fit highlight-current-row style="width: 100%">
-      <el-table-column prop="id" label="Id" />
-      <el-table-column prop="name" label="学科"/>
-      <el-table-column prop="levelName" label="年级" />
-      <el-table-column width="220px" label="操作" align="center">
+      <el-table-column prop="id" label="Id" width="60px" />
+      <el-table-column prop="name" label="Module"/>
+      <el-table-column width="220px" label="Operation" align="center">
         <template slot-scope="{row}">
           <router-link :to="{path:'/education/subject/edit', query:{id:row.id}}" class="link-left">
-            <el-button size="mini">编辑</el-button>
+            <el-button size="mini">Edit</el-button>
           </router-link>
-          <el-button   size="mini" type="danger" @click="delSubject(row)" class="link-left">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -42,7 +38,7 @@ export default {
   data () {
     return {
       queryParam: {
-        level: null,
+        module: null,
         pageIndex: 1,
         pageSize: 10
       },
@@ -68,26 +64,12 @@ export default {
     submitForm () {
       this.queryParam.pageIndex = 1
       this.search()
-    },
-    delSubject (row) {
-      let _this = this
-      subjectApi.deleteSubject(row.id).then(re => {
-        if (re.code === 1) {
-          _this.search()
-          _this.$message.success(re.message)
-        } else {
-          _this.$message.error(re.message)
-        }
-      })
     }
   },
   computed: {
     ...mapGetters('enumItem', [
       'enumFormat'
-    ]),
-    ...mapState('enumItem', {
-      levelEnum: state => state.user.levelEnum
-    })
+    ])
   }
 }
 </script>

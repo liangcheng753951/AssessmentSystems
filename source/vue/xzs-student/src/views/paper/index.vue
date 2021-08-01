@@ -2,22 +2,19 @@
   <div style="margin-top: 10px" class="app-contain">
     <el-tabs tab-position="left"  v-model="tabId"  @tab-click="subjectChange" >
       <el-tab-pane :label="item.name"  :key="item.id" :name="item.id" v-for="item in subjectList" style="margin-left: 20px;" >
-        <el-row  style="float: right">
-          <el-radio-group v-model="queryParam.paperType" size="mini" @change="paperTypeChange" >
-            <el-radio v-for="item in paperTypeEnum" size="mini" :key="item.key" :label="item.key">{{item.value}}</el-radio>
-          </el-radio-group>
-        </el-row>
+        <el-card>
         <el-table v-loading="listLoading" :data="tableData" fit highlight-current-row style="width: 100%">
-          <el-table-column prop="id" label="序号" width="90px"/>
-          <el-table-column prop="name" label="名称"  />
+          <el-table-column prop="id" label="ID" width="90px"/>
+          <el-table-column prop="name" label="Paper name"  />
           <el-table-column align="right">
             <template slot-scope="{row}">
               <router-link target="_blank" :to="{path:'/do',query:{id:row.id}}">
-                <el-button  type="text" size="small">开始答题</el-button>
+                <el-button  type="text" size="small">Start Assessment</el-button>
               </router-link>
             </template>
           </el-table-column>
         </el-table>
+        </el-card>
         <pagination v-show="total>0" :total="total" :background="false" :page.sync="queryParam.pageIndex" :limit.sync="queryParam.pageSize"
                     @pagination="search" style="margin-top: 20px"/>
       </el-tab-pane>
@@ -27,7 +24,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import examPaperApi from '@/api/examPaper'
 import subjectApi from '@/api/subject'
@@ -73,18 +69,10 @@ export default {
         this.listLoading = false
       })
     },
-    paperTypeChange (val) {
-      this.search()
-    },
     subjectChange (tab, event) {
       this.queryParam.subjectId = Number(this.tabId)
       this.search()
     }
-  },
-  computed: {
-    ...mapState('enumItem', {
-      paperTypeEnum: state => state.exam.examPaper.paperTypeEnum
-    })
   }
 }
 </script>

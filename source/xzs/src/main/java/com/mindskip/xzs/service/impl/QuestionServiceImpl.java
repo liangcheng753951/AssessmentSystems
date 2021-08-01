@@ -1,17 +1,13 @@
 package com.mindskip.xzs.service.impl;
 
-import com.mindskip.xzs.domain.other.KeyValue;
 import com.mindskip.xzs.domain.Question;
 import com.mindskip.xzs.domain.TextContent;
-import com.mindskip.xzs.domain.enums.QuestionStatusEnum;
-import com.mindskip.xzs.domain.enums.QuestionTypeEnum;
 import com.mindskip.xzs.domain.question.QuestionItemObject;
 import com.mindskip.xzs.domain.question.QuestionObject;
 import com.mindskip.xzs.repository.QuestionMapper;
 import com.mindskip.xzs.service.QuestionService;
 import com.mindskip.xzs.service.SubjectService;
 import com.mindskip.xzs.service.TextContentService;
-import com.mindskip.xzs.utility.DateTimeUtil;
 import com.mindskip.xzs.utility.JsonUtil;
 import com.mindskip.xzs.utility.ModelMapperSingle;
 import com.mindskip.xzs.utility.ExamUtil;
@@ -25,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,9 +54,7 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     @Transactional
     public Question insertFullQuestion(QuestionEditRequestVM model, Integer userId) {
         Date now = new Date();
-        Integer gradeLevel = subjectService.levelBySubjectId(model.getSubjectId());
 
-        //题干、解析、选项等 插入
         TextContent infoTextContent = new TextContent();
         infoTextContent.setCreateTime(now);
         setQuestionInfoFromVM(infoTextContent, model);
@@ -67,11 +62,9 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
 
         Question question = new Question();
         question.setSubjectId(model.getSubjectId());
-        question.setGradeLevel(gradeLevel);
         question.setCreateTime(now);
-        question.setQuestionType(model.getQuestionType());
-        question.setStatus(QuestionStatusEnum.OK.getCode());
-        question.setCorrectFromVM(model.getCorrect(), model.getCorrectArray());
+        question.setKeyPoints(String.join(",", model.getKeyPoints()));
+        question.setCorrect(model.getCorrect());
         question.setScore(ExamUtil.scoreFromVM(model.getScore()));
         question.setDifficult(model.getDifficult());
         question.setInfoTextContentId(infoTextContent.getId());
@@ -84,13 +77,11 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     @Override
     @Transactional
     public Question updateFullQuestion(QuestionEditRequestVM model) {
-        Integer gradeLevel = subjectService.levelBySubjectId(model.getSubjectId());
         Question question = questionMapper.selectByPrimaryKey(model.getId());
+        question.setKeyPoints(String.join(",", model.getKeyPoints()));
         question.setSubjectId(model.getSubjectId());
-        question.setGradeLevel(gradeLevel);
         question.setScore(ExamUtil.scoreFromVM(model.getScore()));
-        question.setDifficult(model.getDifficult());
-        question.setCorrectFromVM(model.getCorrect(), model.getCorrectArray());
+        question.setCorrect(model.getCorrect());
         questionMapper.updateByPrimaryKeySelective(question);
 
         //题干、解析、选项等 更新
@@ -115,27 +106,7 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
         QuestionObject questionObject = JsonUtil.toJsonObject(questionInfoTextContent.getContent(), QuestionObject.class);
         QuestionEditRequestVM questionEditRequestVM = modelMapper.map(question, QuestionEditRequestVM.class);
         questionEditRequestVM.setTitle(questionObject.getTitleContent());
-
-        //答案
-        QuestionTypeEnum questionTypeEnum = QuestionTypeEnum.fromCode(question.getQuestionType());
-        switch (questionTypeEnum) {
-            case SingleChoice:
-            case TrueFalse:
-                questionEditRequestVM.setCorrect(question.getCorrect());
-                break;
-            case MultipleChoice:
-                questionEditRequestVM.setCorrectArray(ExamUtil.contentToArray(question.getCorrect()));
-                break;
-            case GapFilling:
-                List<String> correctContent = questionObject.getQuestionItemObjects().stream().map(d -> d.getContent()).collect(Collectors.toList());
-                questionEditRequestVM.setCorrectArray(correctContent);
-                break;
-            case ShortAnswer:
-                questionEditRequestVM.setCorrect(questionObject.getCorrect());
-                break;
-            default:
-                break;
-        }
+        questionEditRequestVM.setKeyPoints(Arrays.asList(question.getKeyPoints().split(",")));
         questionEditRequestVM.setScore(ExamUtil.scoreToVM(question.getScore()));
         questionEditRequestVM.setAnalyze(questionObject.getAnalyze());
 
@@ -143,9 +114,6 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
         //题目项映射
         List<QuestionEditItemVM> editItems = questionObject.getQuestionItemObjects().stream().map(o -> {
             QuestionEditItemVM questionEditItemVM = modelMapper.map(o, QuestionEditItemVM.class);
-            if (o.getScore() != null) {
-                questionEditItemVM.setScore(ExamUtil.scoreToVM(o.getScore()));
-            }
             return questionEditItemVM;
         }).collect(Collectors.toList());
         questionEditRequestVM.setItems(editItems);
@@ -158,8 +126,6 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
                     QuestionItemObject item = new QuestionItemObject();
                     item.setPrefix(i.getPrefix());
                     item.setContent(i.getContent());
-                    item.setItemUuid(i.getItemUuid());
-                    item.setScore(ExamUtil.scoreFromVM(i.getScore()));
                     return item;
                 }
         ).collect(Collectors.toList());
@@ -175,18 +141,4 @@ public class QuestionServiceImpl extends BaseServiceImpl<Question> implements Qu
     public Integer selectAllCount() {
         return questionMapper.selectAllCount();
     }
-
-    @Override
-    public List<Integer> selectMothCount() {
-        Date startTime = DateTimeUtil.getMonthStartDay();
-        Date endTime = DateTimeUtil.getMonthEndDay();
-        List<String> mothStartToNowFormat = DateTimeUtil.MothStartToNowFormat();
-        List<KeyValue> mouthCount = questionMapper.selectCountByDate(startTime, endTime);
-        return mothStartToNowFormat.stream().map(md -> {
-            KeyValue keyValue = mouthCount.stream().filter(kv -> kv.getName().equals(md)).findAny().orElse(null);
-            return null == keyValue ? 0 : keyValue.getValue();
-        }).collect(Collectors.toList());
-    }
-
-
 }

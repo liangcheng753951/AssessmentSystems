@@ -1,7 +1,7 @@
 <template>
   <div v-loading="qLoading" style="line-height:1.8">
-    <div>
-      <div>
+    <div v-if="qType==1||qType==2||qType==3||qType==4||qType==5">
+      <div v-if="qType==1" >
         <div class="q-title" v-html="question.title"/>
         <div class="q-content">
           <el-radio-group v-model="answer.content">
@@ -34,8 +34,12 @@
       </div>
       <div class="question-answer-show-item">
         <span class="question-show-item">Correct answer：</span>
-        <span v-html="question.correct" class="q-item-span-content"/>
+        <span v-if="qType==1||qType==2 ||qType==5" v-html="question.correct" class="q-item-span-content"/>
+        <span v-if="qType==3" v-html="trueFalseFormatter(question)" class="q-item-span-content"/>
+        <span v-if="qType==4">{{question.correctArray}}</span>
       </div>
+    </div>
+    <div v-else>
     </div>
   </div>
 
@@ -81,8 +85,8 @@ export default {
   computed: {
     ...mapGetters('enumItem', ['enumFormat']),
     ...mapState('enumItem', {
-      doRightEnum: state => state.exam.question.answer.doRightEnum,
-      doRightTag: state => state.exam.question.answer.doRightTag
+      doRightEnum: state => state.exam.questionAnswer.answer.doRightEnum,
+      doRightTag: state => state.exam.questionAnswer.answer.doRightTag
     })
   }
 }

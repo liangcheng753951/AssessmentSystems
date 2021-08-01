@@ -6,18 +6,8 @@
              <el-tag :type="questionCompleted(item.completed)" class="do-exam-title-tag" @click="goAnchor('#question-'+item.itemOrder)">{{item.itemOrder}}</el-tag>
         </span>
         <span class="do-exam-time">
-          <label>剩余时间：</label>
+          <label>Time remaining：</label>
           <label>{{formatSeconds(remainTime)}}</label>
-        </span>
-      </el-col>
-    </el-row>
-    <el-row  class="do-exam-title-hidden">
-      <el-col :span="24">
-        <span :key="item.itemOrder"  v-for="item in answer.answerItems">
-             <el-tag  class="do-exam-title-tag" >{{item.itemOrder}}</el-tag>
-        </span>
-        <span class="do-exam-time">
-          <label>剩余时间：</label>
         </span>
       </el-col>
     </el-row>
@@ -25,8 +15,8 @@
       <el-header class="align-center">
         <h1>{{form.name}}</h1>
         <div>
-          <span class="question-title-padding">试卷总分：{{form.score}}</span>
-          <span class="question-title-padding">考试时间：{{form.suggestTime}}分钟</span>
+          <span class="question-title-padding">Full marks：{{form.score}}</span>
+          <span class="question-title-padding">Suggestion Time：{{form.suggestTime}} minutes</span>
         </div>
       </el-header>
       <el-main>
@@ -36,15 +26,14 @@
             <el-card class="exampaper-item-box" v-if="titleItem.questionItems.length!==0">
               <el-form-item :key="questionItem.itemOrder" :label="questionItem.itemOrder+'.'"
                             v-for="questionItem in titleItem.questionItems"
-                            class="exam-question-item" label-width="50px" :id="'question-'+ questionItem.itemOrder">
+                            class="exam-question-item" label-width="80px" :id="'question-'+ questionItem.itemOrder">
                 <QuestionEdit :qType="questionItem.questionType" :question="questionItem"
                               :answer="answer.answerItems[questionItem.itemOrder-1]"/>
               </el-form-item>
             </el-card>
           </el-row>
            <el-row class="do-align-center">
-             <el-button type="primary" @click="submitForm">提交</el-button>
-             <el-button>取消</el-button>
+             <el-button type="primary" @click="submitForm">Submit</el-button>
            </el-row>
         </el-form>
       </el-main>
@@ -79,12 +68,16 @@ export default {
     let _this = this
     if (id && parseInt(id) !== 0) {
       _this.formLoading = true
-      examPaperApi.select(id).then(re => {
+      examPaperApi.selectForAssessment(id).then(re => {
         _this.form = re.response
         _this.remainTime = re.response.suggestTime * 60
         _this.initAnswer()
-        _this.timeReduce()
         _this.formLoading = false
+        if (re.response.duplicateWork) {
+          _this.openConfirm()
+        } else {
+          _this.timeReduce()
+        }
       })
     }
   },
@@ -132,8 +125,8 @@ export default {
       _this.formLoading = true
       examPaperAnswerApi.answerSubmit(this.answer).then(re => {
         if (re.code === 1) {
-          _this.$alert('试卷得分：' + re.response + '分', '考试结果', {
-            confirmButtonText: '返回考试记录',
+          _this.$alert('Your got ' + re.response + ' marks', 'Assessment Result', {
+            confirmButtonText: 'Return to records',
             callback: action => {
               _this.$router.push('/record/index')
             }
@@ -144,6 +137,18 @@ export default {
         _this.formLoading = false
       }).catch(e => {
         _this.formLoading = false
+      })
+    },
+    openConfirm () {
+      this.$confirm('You have already done this assessment, do you want to do it again?', 'Notice', {
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }).then(() => {
+        this.timeReduce()
+      }).catch(() => {
+        let _this = this
+        _this.$router.push('/record/index')
       })
     }
   },

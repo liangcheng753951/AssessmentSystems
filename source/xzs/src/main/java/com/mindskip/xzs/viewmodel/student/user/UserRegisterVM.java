@@ -1,9 +1,11 @@
 package com.mindskip.xzs.viewmodel.student.user;
 
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
+@Data
 public class UserRegisterVM {
 
     @NotBlank
@@ -12,30 +14,8 @@ public class UserRegisterVM {
     @NotBlank
     private String password;
 
-    @NotNull
-    private Integer userLevel;
+    @NotBlank
+    private String passwordConfirm;
 
-    public String getUserName() {
-        return userName;
-    }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Integer getUserLevel() {
-        return userLevel;
-    }
-
-    public void setUserLevel(Integer userLevel) {
-        this.userLevel = userLevel;
-    }
 }

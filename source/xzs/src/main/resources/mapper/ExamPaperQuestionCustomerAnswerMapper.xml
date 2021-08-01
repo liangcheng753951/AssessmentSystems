@@ -6,7 +6,6 @@
     <result column="question_id" jdbcType="INTEGER" property="questionId" />
     <result column="exam_paper_id" jdbcType="INTEGER" property="examPaperId" />
     <result column="exam_paper_answer_id" jdbcType="INTEGER" property="examPaperAnswerId" />
-    <result column="question_type" jdbcType="INTEGER" property="questionType" />
     <result column="subject_id" jdbcType="INTEGER" property="subjectId" />
     <result column="customer_score" jdbcType="INTEGER" property="customerScore" />
     <result column="question_score" jdbcType="INTEGER" property="questionScore" />
@@ -19,7 +18,7 @@
     <result column="item_order" jdbcType="INTEGER" property="itemOrder" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, question_id, exam_paper_id, exam_paper_answer_id, question_type, subject_id,
+    id, question_id, exam_paper_id, exam_paper_answer_id, subject_id,
     customer_score, question_score, question_text_content_id, answer, text_content_id,
     do_right, create_user, create_time, item_order
   </sql>
@@ -35,13 +34,13 @@
   </delete>
   <insert id="insert" parameterType="com.mindskip.xzs.domain.ExamPaperQuestionCustomerAnswer" useGeneratedKeys="true" keyProperty="id">
     insert into t_exam_paper_question_customer_answer (id, question_id, exam_paper_id,
-      exam_paper_answer_id, question_type, subject_id,
+      exam_paper_answer_id, subject_id,
       customer_score, question_score, question_text_content_id,
       answer, text_content_id, do_right,
       create_user, create_time, item_order
       )
     values (#{id,jdbcType=INTEGER}, #{questionId,jdbcType=INTEGER}, #{examPaperId,jdbcType=INTEGER},
-      #{examPaperAnswerId,jdbcType=INTEGER}, #{questionType,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER},
+      #{examPaperAnswerId,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER},
       #{customerScore,jdbcType=INTEGER}, #{questionScore,jdbcType=INTEGER}, #{questionTextContentId,jdbcType=INTEGER},
       #{answer,jdbcType=VARCHAR}, #{textContentId,jdbcType=INTEGER}, #{doRight,jdbcType=BIT},
       #{createUser,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{itemOrder,jdbcType=INTEGER}
@@ -61,9 +60,6 @@
       </if>
       <if test="examPaperAnswerId != null">
         exam_paper_answer_id,
-      </if>
-      <if test="questionType != null">
-        question_type,
       </if>
       <if test="subjectId != null">
         subject_id,
@@ -109,9 +105,6 @@
       <if test="examPaperAnswerId != null">
         #{examPaperAnswerId,jdbcType=INTEGER},
       </if>
-      <if test="questionType != null">
-        #{questionType,jdbcType=INTEGER},
-      </if>
       <if test="subjectId != null">
         #{subjectId,jdbcType=INTEGER},
       </if>
@@ -156,9 +149,6 @@
       <if test="examPaperAnswerId != null">
         exam_paper_answer_id = #{examPaperAnswerId,jdbcType=INTEGER},
       </if>
-      <if test="questionType != null">
-        question_type = #{questionType,jdbcType=INTEGER},
-      </if>
       <if test="subjectId != null">
         subject_id = #{subjectId,jdbcType=INTEGER},
       </if>
@@ -197,7 +187,6 @@
     set question_id = #{questionId,jdbcType=INTEGER},
       exam_paper_id = #{examPaperId,jdbcType=INTEGER},
       exam_paper_answer_id = #{examPaperAnswerId,jdbcType=INTEGER},
-      question_type = #{questionType,jdbcType=INTEGER},
       subject_id = #{subjectId,jdbcType=INTEGER},
       customer_score = #{customerScore,jdbcType=INTEGER},
       question_score = #{questionScore,jdbcType=INTEGER},
@@ -211,14 +200,6 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
-
-
-
-
-
-
-
-
   <select id="selectListByPaperAnswerId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
@@ -228,21 +209,10 @@
   </select>
 
 
-  <select id="studentPage" resultMap="BaseResultMap" parameterType="com.mindskip.xzs.viewmodel.student.question.answer.QuestionPageStudentRequestVM">
-    SELECT
-    <include refid="Base_Column_List"/>
-    FROM t_exam_paper_question_customer_answer
-    <where>
-      and do_right=FALSE
-      and create_user=#{createUser}
-    </where>
-  </select>
-
-
   <insert id="insertList" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id" >
     insert into t_exam_paper_question_customer_answer ( question_id, question_score,
     subject_id, create_time, create_user,
-    text_content_id, exam_paper_id, question_type,
+    text_content_id, exam_paper_id,
     answer, customer_score, exam_paper_answer_id ,
     do_right,question_text_content_id,item_order)
     values
@@ -250,33 +220,9 @@
              separator=",">
       ( #{item.questionId,jdbcType=INTEGER}, #{item.questionScore,jdbcType=INTEGER},
       #{item.subjectId,jdbcType=INTEGER}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.createUser,jdbcType=INTEGER},
-      #{item.textContentId,jdbcType=INTEGER}, #{item.examPaperId,jdbcType=INTEGER}, #{item.questionType,jdbcType=INTEGER},
+      #{item.textContentId,jdbcType=INTEGER}, #{item.examPaperId,jdbcType=INTEGER},
       #{item.answer,jdbcType=VARCHAR}, #{item.customerScore,jdbcType=INTEGER}, #{item.examPaperAnswerId,jdbcType=INTEGER},
       #{item.doRight,jdbcType=BIT},#{item.questionTextContentId,jdbcType=INTEGER},#{item.itemOrder,jdbcType=INTEGER})
     </foreach>
   </insert>
-
-
-  <select id="selectAllCount"  resultType="java.lang.Integer">
-		SELECT count(*) from t_exam_paper_question_customer_answer
-  </select>
-
-
-  <select id="selectCountByDate"  resultType="com.mindskip.xzs.domain.other.KeyValue">
-		SELECT create_time as name,COUNT(create_time) as value from
-		        (
-				  SELECT DATE_FORMAT(create_time,'%Y-%m-%d') as create_time from t_exam_paper_question_customer_answer
-					WHERE  create_time  between  #{startTime}  and  #{endTime}
-				) a
-		GROUP BY create_time
-  </select>
-
-  <update id="updateScore" parameterType="java.util.List">
-    <foreach collection="list" item="item" >
-        update t_exam_paper_question_customer_answer
-        set customer_score=#{item.customerScore} , do_right=#{item.doRight}
-        where id=#{item.id} ;
-    </foreach>
-  </update>
-
 </mapper>

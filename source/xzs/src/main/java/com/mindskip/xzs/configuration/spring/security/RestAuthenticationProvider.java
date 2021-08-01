@@ -22,10 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 
 /**
- * 登录用户名密码验证
- *
- * @author :  武汉思维跳跃科技有限公司
- * Description :  身份验证
+ * Login username password verification
  */
 
 @Component
@@ -33,13 +30,11 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
-    private final WebContext webContext;
 
     @Autowired
-    public RestAuthenticationProvider(AuthenticationService authenticationService, UserService userService, WebContext webContext) {
+    public RestAuthenticationProvider(AuthenticationService authenticationService, UserService userService) {
         this.authenticationService = authenticationService;
         this.userService = userService;
-        this.webContext = webContext;
     }
 
     @Override
@@ -49,17 +44,17 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
         com.mindskip.xzs.domain.User user = userService.getUserByUserName(username);
         if (user == null) {
-            throw new UsernameNotFoundException("用户名或密码错误");
+            throw new UsernameNotFoundException("Incorrect username or password");
         }
 
         boolean result = authenticationService.authUser(user, username, password);
         if (!result) {
-            throw new BadCredentialsException("用户名或密码错误");
+            throw new BadCredentialsException("Incorrect username or password");
         }
 
         UserStatusEnum userStatusEnum = UserStatusEnum.fromCode(user.getStatus());
         if (UserStatusEnum.Disable == userStatusEnum) {
-            throw new LockedException("用户被禁用");
+            throw new LockedException("Users are disabled");
         }
 
         ArrayList<GrantedAuthority> grantedAuthorities = new ArrayList<>();

@@ -29,7 +29,7 @@ public interface ExamPaperAnswerMapper extends BaseMapper<ExamPaperAnswer> {
 
     List<KeyValue> selectCountByDate(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
-    ExamPaperAnswer getByPidUid(@Param("pid") Integer paperId, @Param("uid") Integer uid);
-
     List<ExamPaperAnswer> adminPage(com.mindskip.xzs.viewmodel.admin.paper.ExamPaperAnswerPageRequestVM requestVM);
+
+    int countByStatusAndStudentAndPaper(@Param("student_id")Integer studentId,@Param("paper_id")Integer paperId,@Param("status")Integer status );
 }
